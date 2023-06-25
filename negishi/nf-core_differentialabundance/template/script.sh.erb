@@ -1,0 +1,795 @@
+#!/usr/bin/env bash
+
+# Clean the environment
+module purge
+
+# Go to workding directory
+workdir=<%= context.workdir %>
+
+if [ ! -d "$workdir" ]
+then
+	echo "$workdir does not exist."
+	mkdir -p $workdir
+fi
+cd $workdir
+
+# Load the required module
+module load nextflow
+
+module list
+
+# Pipeline parameters
+version="<%= context.version %>"
+genome_input="<%= context.genome %>"
+gtf_input="<%= context.gtf %>"
+input_input="<%= context.input %>"
+outdir_input="<%= context.outdir %>"
+contrasts_input="<%= context.contrasts %>"
+matrix_input="<%= context.matrix %>"
+features_id_col_input="<%= context.features_id_col %>"
+features_name_col_input="<%= context.features_name_col %>"
+features_type_input="<%= context.features_type %>"
+study_name_input="<%= context.study_name %>"
+filtering_min_abundance_input="<%= context.filtering_min_abundance %>"
+filtering_min_samples_input="<%= context.filtering_min_samples %>"
+filtering_min_proportion_input="<%= context.filtering_min_proportion %>"
+filtering_grouping_var_input="<%= context.filtering_grouping_var %>"
+exploratory_clustering_method_input="<%= context.exploratory_clustering_method %>"
+exploratory_cor_method_input="<%= context.exploratory_cor_method %>"
+exploratory_n_features_input="<%= context.exploratory_n_features %>"
+exploratory_whisker_distance_input="<%= context.exploratory_whisker_distance %>"
+exploratory_main_variable_input="<%= context.exploratory_main_variable %>"
+exploratory_palette_name_input="<%= context.exploratory_palette_name %>"
+sizefactors_from_controls_input="<%= context.sizefactors_from_controls %>"
+control_features_input="<%= context.control_features %>"
+observations_id_col_input="<%= context.observations_id_col %>"
+observations_type_input="<%= context.observations_type %>"
+observations_name_col_input="<%= context.observations_name_col %>"
+features_metadata_cols_input="<%= context.features_metadata_cols %>"
+features_input="<%= context.features %>"
+differential_file_suffix_input="<%= context.differential_file_suffix %>"
+differential_feature_id_column_input="<%= context.differential_feature_id_column %>"
+differential_fc_column_input="<%= context.differential_fc_column %>"
+differential_pval_column_input="<%= context.differential_pval_column %>"
+differential_qval_column_input="<%= context.differential_qval_column %>"
+differential_min_fold_change_input="<%= context.differential_min_fold_change %>"
+differential_max_pval_input="<%= context.differential_max_pval %>"
+differential_max_qval_input="<%= context.differential_max_qval %>"
+differential_feature_name_column_input="<%= context.differential_feature_name_column %>"
+differential_foldchanges_logged_input="<%= context.differential_foldchanges_logged %>"
+differential_palette_name_input="<%= context.differential_palette_name %>"
+differential_subset_to_contrast_samples_input="<%= context.differential_subset_to_contrast_samples %>"
+deseq2_test_input="<%= context.deseq2_test %>"
+deseq2_fit_type_input="<%= context.deseq2_fit_type %>"
+deseq2_sf_type_input="<%= context.deseq2_sf_type %>"
+deseq2_min_replicates_for_replace_input="<%= context.deseq2_min_replicates_for_replace %>"
+deseq2_use_t_input="<%= context.deseq2_use_t %>"
+deseq2_independent_filtering_input="<%= context.deseq2_independent_filtering %>"
+deseq2_lfc_threshold_input="<%= context.deseq2_lfc_threshold %>"
+deseq2_alt_hypothesis_input="<%= context.deseq2_alt_hypothesis %>"
+deseq2_p_adjust_method_input="<%= context.deseq2_p_adjust_method %>"
+deseq2_alpha_input="<%= context.deseq2_alpha %>"
+deseq2_minmu_input="<%= context.deseq2_minmu %>"
+deseq2_vs_method_input="<%= context.deseq2_vs_method %>"
+deseq2_shrink_lfc_input="<%= context.deseq2_shrink_lfc %>"
+deseq2_vs_blind_input="<%= context.deseq2_vs_blind %>"
+deseq2_vst_nsub_input="<%= context.deseq2_vst_nsub %>"
+gsea_run_input="<%= context.gsea_run %>"
+gsea_permute_input="<%= context.gsea_permute %>"
+gsea_nperm_input="<%= context.gsea_nperm %>"
+gsea_scoring_scheme_input="<%= context.gsea_scoring_scheme %>"
+gsea_metric_input="<%= context.gsea_metric %>"
+gsea_sort_input="<%= context.gsea_sort %>"
+gsea_order_input="<%= context.gsea_order %>"
+gsea_set_max_input="<%= context.gsea_set_max %>"
+gsea_set_min_input="<%= context.gsea_set_min %>"
+gsea_norm_input="<%= context.gsea_norm %>"
+gsea_rnd_type_input="<%= context.gsea_rnd_type %>"
+gsea_make_sets_input="<%= context.gsea_make_sets %>"
+gsea_median_input="<%= context.gsea_median %>"
+gsea_num_input="<%= context.gsea_num %>"
+gsea_plot_top_x_input="<%= context.gsea_plot_top_x %>"
+gsea_rnd_seed_input="<%= context.gsea_rnd_seed %>"
+gsea_save_rnd_lists_input="<%= context.gsea_save_rnd_lists %>"
+gsea_zip_report_input="<%= context.gsea_zip_report %>"
+gsea_gene_sets_input="<%= context.gsea_gene_sets %>"
+shinyngs_build_app_input="<%= context.shinyngs_build_app %>"
+shinyngs_deploy_to_shinyapps_io_input="<%= context.shinyngs_deploy_to_shinyapps_io %>"
+shinyngs_shinyapps_account_input="<%= context.shinyngs_shinyapps_account %>"
+shinyngs_shinyapps_app_name_input="<%= context.shinyngs_shinyapps_app_name %>"
+shinyngs_guess_unlog_matrices_input="<%= context.shinyngs_guess_unlog_matrices %>"
+resume_input="<%= context.resume %>"
+extra_parameters_input="<%= context.extra_parameters %>"
+
+# Test whether study_name is set
+if [ -z "${study_name_input// }" ]
+then
+        study_name=""
+else
+        study_name="--study_name $study_name_input"
+fi
+
+# Test whether genome is set
+if [ -z "${genome_input// }" ]
+then
+        genome=""
+else
+        genome="--genome $genome_input"
+fi
+
+# Test whether gtf is set
+if [ -z "${gtf_input// }" ]
+then
+        gtf=""
+else
+        gtf="--gtf $gtf_input"
+fi
+
+# Test whether input is set
+if [ -z "${input_input// }" ]
+then
+        input=""
+else
+        input="--input $input_input"
+fi
+
+# Test whether workdir is set
+if [ -z "${workdir_input// }" ]
+then
+        workdir=""
+else
+        workdir="--workdir $workdir_input"
+fi
+
+# Test whether genome is set
+if [ -z "${genome_input// }" ]
+then
+        genome=""
+        iGenomes_base=""
+else
+        echo "you're using the iGenomes $reference_input"
+        genome="--genome $genome_input"
+        iGenomes_base="--igenomes_base /depot/itap/datasets/igenomes"
+fi
+
+
+# Test whether gtf is set
+if [ -z "${gtf_input// }" ]
+then
+        gtf=""
+else
+        gtf="--gtf $gtf_input"
+fi
+
+# Test whether input is set
+if [ -z "${input_input// }" ]
+then
+        input=""
+else
+        input="--input $input_input"
+fi
+
+# Test whether workdir is set
+if [ -z "${workdir_input// }" ]
+then
+        workdir=""
+else
+        workdir="--workdir $workdir_input"
+fi
+
+# Test whether output is set
+if [ -z "${outdir_input// }" ]
+then
+        outdir=""
+else
+        outdir="--outdir $outdir_input"
+fi
+
+# Test whether contrasts is set
+if [ -z "${contrasts_input// }" ]
+then
+        contrasts=""
+else
+        contrasts="--contrasts $contrasts_input"
+fi
+
+# Test whether matrix is set
+if [ -z "${matrix_input// }" ]
+then
+        matrix=""
+else
+        matrix="--matrix $matrix_input"
+fi
+
+# Test whether observations_id_col is set
+if [ -z "${observations_id_col_input// }" ]
+then
+        observations_id_col=""
+else
+        observations_id_col="--observations_id_col $observations_id_col_input"
+fi
+
+# Test whether observations_type is set
+if [ -z "${observations_type_input// }" ]
+then
+        observations_type=""
+else
+        observations_type="--observations_type $observations_type_input"
+fi
+
+# Test whether observations_name_col is set
+if [ -z "${observations_name_col_input// }" ]
+then
+        observations_name_col=""
+else
+        observations_name_col="--observations_name_col $observations_name_col_input"
+fi
+
+
+# Test whether features_id_col is set
+if [ -z "${features_id_col_input// }" ]
+then
+        features_id_col=""
+else
+        features_id_col="--features_id_col $features_id_col_input"
+fi
+
+# Test whether features_name_col is set
+if [ -z "${features_name_col_input// }" ]
+then
+        features_name_col=""
+else
+        features_name_col="--features_name_col $features_name_col_input"
+fi
+
+# Test whether features_type is set
+if [ -z "${features_type_input// }" ]
+then
+        features_type=""
+else
+        features_type="--features_type $features_type_input"
+fi
+
+# Test whether control_features is set
+if [ -z "${control_features_input// }" ]
+then
+        control_features=""
+else
+        control_features="--control_features $control_features_input"
+fi
+
+# Test whether features_metadata_cols is set
+if [ -z "${features_metadata_cols_input// }" ]
+then
+        features_metadata_cols=""
+else
+        features_metadata_cols="--features_metadata_cols $features_metadata_cols_input"
+fi
+
+# Test whether features is set
+if [ -z "${features_input// }" ]
+then
+        features=""
+else
+        features="--features $features_input"
+fi
+
+
+# Test whether filtering_min_abundance is set
+if [ -z "${filtering_min_abundance_input// }" ]
+then
+        filtering_min_abundance=""
+else
+        filtering_min_abundance="--filtering_min_abundance $filtering_min_abundance_input"
+fi
+
+# Test whether filtering_min_samples is set
+if [ -z "${filtering_min_samples_input// }" ]
+then
+        filtering_min_samples=""
+else
+        filtering_min_samples="--filtering_min_samples $filtering_min_samples_input"
+fi
+
+# Test whether filtering_min_proportion is set
+if [ -z "${filtering_min_proportion_input// }" ]
+then
+        filtering_min_proportion=""
+else
+        filtering_min_proportion="--filtering_min_proportion $filtering_min_proportion_input"
+fi
+
+# Test whether filtering_grouping_var is set
+if [ -z "${filtering_grouping_var_input// }" ]
+then
+        filtering_grouping_var=""
+else
+        filtering_grouping_var="--filtering_grouping_var $filtering_grouping_var_input"
+fi
+
+# Test whether exploratory_clustering_method is set
+if [ -z "${exploratory_clustering_method_input// }" ]
+then
+        exploratory_clustering_method=""
+else
+        exploratory_clustering_method="--exploratory_clustering_method $exploratory_clustering_method_input"
+fi
+
+# Test whether exploratory_cor_method is set
+if [ -z "${exploratory_cor_method_input// }" ]
+then
+        exploratory_cor_method=""
+else
+        exploratory_cor_method="--exploratory_cor_method $exploratory_cor_method_input"
+fi
+
+# Test whether exploratory_n_features is set
+if [ -z "${exploratory_n_features_input// }" ]
+then
+        exploratory_n_features=""
+else
+        exploratory_n_features="--exploratory_n_features $exploratory_n_features_input"
+fi
+
+# Test whether exploratory_whisker_distance is set
+if [ -z "${exploratory_whisker_distance_input// }" ]
+then
+        exploratory_whisker_distance=""
+else
+        exploratory_whisker_distance="--exploratory_whisker_distance $exploratory_whisker_distance_input"
+fi
+
+# Test whether exploratory_main_variable is set
+if [ -z "${exploratory_main_variable_input// }" ]
+then
+        exploratory_main_variable=""
+else
+        exploratory_main_variable="--exploratory_main_variable $exploratory_main_variable_input"
+fi
+
+# Test whether exploratory_palette_name is set
+if [ -z "${exploratory_palette_name_input// }" ]
+then
+        exploratory_palette_name=""
+else
+        exploratory_palette_name="--exploratory_palette_name $exploratory_palette_name_input"
+fi
+
+
+# Test whether differential_file_suffix is set
+if [ -z "${differential_file_suffix_input// }" ]
+then
+        differential_file_suffix=""
+else
+        differential_file_suffix="--differential_file_suffix $differential_file_suffix_input"
+fi
+
+# Test whether differential_feature_id_column is set
+if [ -z "${differential_feature_id_column_input// }" ]
+then
+        differential_feature_id_column=""
+else
+        differential_feature_id_column="--differential_feature_id_column $differential_feature_id_column_input"
+fi
+
+# Test whether differential_fc_column is set
+if [ -z "${differential_fc_column_input// }" ]
+then
+        differential_fc_column=""
+else
+        differential_fc_column="--differential_fc_column $differential_fc_column_input"
+fi
+
+# Test whether differential_pval_column is set
+if [ -z "${differential_pval_column_input// }" ]
+then
+        differential_pval_column=""
+else
+        differential_pval_column="--differential_pval_column $differential_pval_column_input"
+fi
+
+# Test whether differential_qval_column is set
+if [ -z "${differential_qval_column_input// }" ]
+then
+        differential_qval_column=""
+else
+        differential_qval_column="--differential_qval_column $differential_qval_column_input"
+fi
+
+# Test whether differential_min_fold_change is set
+if [ -z "${differential_min_fold_change_input// }" ]
+then
+        differential_min_fold_change=""
+else
+        differential_min_fold_change="--differential_min_fold_change $differential_min_fold_change_input"
+fi
+
+# Test whether differential_max_pval is set
+if [ -z "${differential_max_pval_input// }" ]
+then
+        differential_max_pval=""
+else
+        differential_max_pval="--differential_max_pval $differential_max_pval_input"
+fi
+
+# Test whether differential_max_qval is set
+if [ -z "${differential_max_qval_input// }" ]
+then
+        differential_max_qval=""
+else
+        differential_max_qval="--differential_max_qval $differential_max_qval_input"
+fi
+
+# Test whether differential_feature_name_column is set
+if [ -z "${differential_feature_name_column_input// }" ]
+then
+        differential_feature_name_column=""
+else
+        differential_feature_name_column="--differential_feature_name_column $differential_feature_name_column_input"
+fi
+
+# Test whether differential_palette_name is set
+if [ -z "${differential_palette_name_input// }" ]
+then
+        differential_palette_name=""
+else
+        differential_palette_name="--differential_palette_name $differential_palette_name_input"
+fi
+
+# Test whether deseq2_test is set
+if [ -z "${deseq2_test_input// }" ]
+then
+        deseq2_test=""
+else
+        deseq2_test="--deseq2_test $deseq2_test_input"
+fi
+
+# Test whether deseq2_fit_type is set
+if [ -z "${deseq2_fit_type_input// }" ]
+then
+        deseq2_fit_type=""
+else
+        deseq2_fit_type="--deseq2_fit_type $deseq2_fit_type_input"
+fi
+
+# Test whether deseq2_sf_type is set
+if [ -z "${deseq2_sf_type_input// }" ]
+then
+        deseq2_sf_type=""
+else
+        deseq2_sf_type="--deseq2_sf_type $deseq2_sf_type_input"
+fi
+
+# Test whether deseq2_min_replicates_for_replace is set
+if [ -z "${deseq2_min_replicates_for_replace_input// }" ]
+then
+        deseq2_min_replicates_for_replace=""
+else
+        deseq2_min_replicates_for_replace="--deseq2_min_replicates_for_replace $deseq2_min_replicates_for_replace_input"
+fi
+
+# Test whether deseq2_alt_hypothesis is set
+if [ -z "${deseq2_alt_hypothesis_input// }" ]
+then
+        deseq2_alt_hypothesis=""
+else
+        deseq2_alt_hypothesis="--deseq2_alt_hypothesis $deseq2_alt_hypothesis_input"
+fi
+
+# Test whether deseq2_lfc_threshold is set
+if [ -z "${deseq2_lfc_threshold_input// }" ]
+then
+        deseq2_lfc_threshold=""
+else
+        deseq2_lfc_threshold="--deseq2_lfc_threshold $deseq2_lfc_threshold_input"
+fi
+
+# Test whether deseq2_p_adjust_method is set
+if [ -z "${deseq2_p_adjust_method_input// }" ]
+then
+        deseq2_p_adjust_method=""
+else
+        deseq2_p_adjust_method="--deseq2_p_adjust_method $deseq2_p_adjust_method_input"
+fi
+
+# Test whether deseq2_alpha is set
+if [ -z "${deseq2_alpha_input// }" ]
+then
+        deseq2_alpha=""
+else
+        deseq2_alpha="--deseq2_alpha $deseq2_alpha_input"
+fi
+
+# Test whether deseq2_minmu is set
+if [ -z "${deseq2_minmu_input// }" ]
+then
+        deseq2_minmu=""
+else
+        deseq2_minmu="--deseq2_minmu $deseq2_minmu_input"
+fi
+
+# Test whether deseq2_vs_method is set
+if [ -z "${deseq2_vs_method_input// }" ]
+then
+        deseq2_vs_method=""
+else
+        deseq2_vs_method="--deseq2_vs_method $deseq2_vs_method_input"
+fi
+
+# Test whether deseq2_vst_nsub is set
+if [ -z "${deseq2_vst_nsub_input// }" ]
+then
+        deseq2_vst_nsub=""
+else
+        deseq2_vst_nsub="--deseq2_vst_nsub $deseq2_vst_nsub_input"
+fi
+
+# Test whether gsea_permute is set
+if [ -z "${gsea_permute_input// }" ]
+then
+        gsea_permute=""
+else
+        gsea_permute="--gsea_permute $gsea_permute_input"
+fi
+
+# Test whether gsea_nperm is set
+if [ -z "${gsea_nperm_input// }" ]
+then
+        gsea_nperm=""
+else
+        gsea_nperm="--gsea_nperm $gsea_nperm_input"
+fi
+
+# Test whether gsea_scoring_scheme is set
+if [ -z "${gsea_scoring_scheme_input// }" ]
+then
+        gsea_scoring_scheme=""
+else
+        gsea_scoring_scheme="--gsea_scoring_scheme $gsea_scoring_scheme_input"
+fi
+
+# Test whether gsea_metric is set
+if [ -z "${gsea_metric_input// }" ]
+then
+        gsea_metric=""
+else
+        gsea_metric="--gsea_metric $gsea_metric_input"
+fi
+
+# Test whether gsea_sort is set
+if [ -z "${gsea_sort_input// }" ]
+then
+        gsea_sort=""
+else
+        gsea_sort="--gsea_sort $gsea_sort_input"
+fi
+
+# Test whether gsea_order is set
+if [ -z "${gsea_order_input// }" ]
+then
+        gsea_order=""
+else
+        gsea_order="--gsea_order $gsea_order_input"
+fi
+
+# Test whether gsea_set_max is set
+if [ -z "${gsea_set_max_input// }" ]
+then
+        gsea_set_max=""
+else
+        gsea_set_max="--gsea_set_max $gsea_set_max_input"
+fi
+
+# Test whether gsea_set_min is set
+if [ -z "${gsea_set_min_input// }" ]
+then
+        gsea_set_min=""
+else
+        gsea_set_min="--gsea_set_min $gsea_set_min_input"
+fi
+
+# Test whether gsea_norm is set
+if [ -z "${gsea_norm_input// }" ]
+then
+        gsea_norm=""
+else
+        gsea_norm="--gsea_norm $gsea_norm_input"
+fi
+
+# Test whether gsea_rnd_type is set
+if [ -z "${gsea_rnd_type_input// }" ]
+then
+        gsea_rnd_type=""
+else
+        gsea_rnd_type="--gsea_rnd_type $gsea_rnd_type_input"
+fi
+
+# Test whether gsea_num is set
+if [ -z "${gsea_num_input// }" ]
+then
+        gsea_num=""
+else
+        gsea_num="--gsea_num $gsea_num_input"
+fi
+
+# Test whether gsea_plot_top_x is set
+if [ -z "${gsea_plot_top_x_input// }" ]
+then
+        gsea_plot_top_x=""
+else
+        gsea_plot_top_x="--gsea_plot_top_x $gsea_plot_top_x_input"
+fi
+
+# Test whether gsea_rnd_seed is set
+if [ -z "${gsea_rnd_seed_input// }" ]
+then
+        gsea_rnd_seed=""
+else
+        gsea_rnd_seed="--gsea_rnd_seed $gsea_rnd_seed_input"
+fi
+
+# Test whether gsea_gene_sets is set
+if [ -z "${gsea_gene_sets_input// }" ]
+then
+        gsea_gene_sets=""
+else
+        gsea_gene_sets="--gsea_gene_sets $gsea_gene_sets_input"
+fi
+
+# Test whether shinyngs_shinyapps_account is set
+if [ -z "${shinyngs_shinyapps_account_input// }" ]
+then
+        shinyngs_shinyapps_account=""
+else
+        shinyngs_shinyapps_account="--shinyngs_shinyapps_account $shinyngs_shinyapps_account_input"
+fi
+
+# Test whether shinyngs_shinyapps_app_name is set
+if [ -z "${shinyngs_shinyapps_app_name_input// }" ]
+then
+        shinyngs_shinyapps_app_name=""
+else
+        shinyngs_shinyapps_app_name="--shinyngs_shinyapps_app_name $shinyngs_shinyapps_app_name_input"
+fi
+
+# Test whether sizefactors_from_controls is set
+if [ $sizefactors_from_controls_input -eq 1 ]
+then
+        sizefactors_from_controls="--sizefactors_from_controls"
+else
+        sizefactors_from_controls=""
+fi
+
+# Test whether differential_foldchanges_logged is set
+if [ $differential_foldchanges_logged_input -eq 1 ]
+then
+        differential_foldchanges_logged="--differential_foldchanges_logged"
+else
+        differential_foldchanges_logged=""
+fi
+
+# Test whether differential_subset_to_contrast_samples is set
+if [ $differential_subset_to_contrast_samples_input -eq 1 ]
+then
+        differential_subset_to_contrast_samples="--differential_subset_to_contrast_samples"
+else
+        differential_subset_to_contrast_samples=""
+fi
+
+# Test whether deseq2_use_t is set
+if [ $deseq2_use_t_input -eq 1 ]
+then
+        deseq2_use_t="--deseq2_use_t"
+else
+        deseq2_use_t=""
+fi
+
+# Test whether deseq2_independent_filtering is set
+if [ $deseq2_independent_filtering_input -eq 1 ]
+then
+        deseq2_independent_filtering="--deseq2_independent_filtering"
+else
+        deseq2_independent_filtering=""
+fi
+
+
+# Test whether deseq2_shrink_lfc is set
+if [ $deseq2_shrink_lfc_input -eq 1 ]
+then
+        deseq2_shrink_lfc="--deseq2_shrink_lfc"
+else
+        deseq2_shrink_lfc=""
+fi
+
+# Test whether deseq2_vs_blind is set
+if [ $deseq2_vs_blind_input -eq 1 ]
+then
+        deseq2_vs_blind="--deseq2_vs_blind"
+else
+        deseq2_vs_blind=""
+fi
+
+# Test whether gsea_run is set
+if [ $gsea_run_input -eq 1 ]
+then
+        gsea_run="--gsea_run"
+else
+        gsea_run=""
+fi
+
+# Test whether gsea_make_sets is set
+if [ $gsea_make_sets_input -eq 1 ]
+then
+        gsea_make_sets="--gsea_make_sets"
+else
+        gsea_make_sets=""
+fi
+
+# Test whether gsea_median is set
+if [ $gsea_median_input -eq 1 ]
+then
+        gsea_median="--gsea_median"
+else
+        gsea_median=""
+fi
+
+# Test whether gsea_save_rnd_lists is set
+if [ $gsea_save_rnd_lists_input -eq 1 ]
+then
+        gsea_save_rnd_lists="--gsea_save_rnd_lists"
+else
+        gsea_save_rnd_lists=""
+fi
+
+# Test whether gsea_zip_report is set
+if [ $gsea_zip_report_input -eq 1 ]
+then
+        gsea_zip_report="--gsea_zip_report"
+else
+        gsea_zip_report=""
+fi
+
+# Test whether shinyngs_build_app is set
+if [ $shinyngs_build_app_input -eq 1 ]
+then
+        shinyngs_build_app="--shinyngs_build_app"
+else
+        shinyngs_build_app=""
+fi
+
+# Test whether shinyngs_deploy_to_shinyapps_io is set
+if [ $shinyngs_deploy_to_shinyapps_io_input -eq 1 ]
+then
+        shinyngs_deploy_to_shinyapps_io="--shinyngs_deploy_to_shinyapps_io"
+else
+        shinyngs_deploy_to_shinyapps_io=""
+fi
+
+# Test whether shinyngs_guess_unlog_matrices is set
+if [ $shinyngs_guess_unlog_matrices_input -eq 1 ]
+then
+        shinyngs_guess_unlog_matrices="--shinyngs_guess_unlog_matrices"
+else
+        shinyngs_guess_unlog_matrices=""
+fi
+
+# Test whether resume is set
+if [ $resume_input -eq 1 ]
+then
+        resume="--resume"
+else
+        resume=""
+fi
+
+# Test whether extra_parameters is set
+if [ -z "${extra_parameters_input// }" ]
+then
+        extra_parameters=""
+else
+        extra_parameters="--extra_parameters $extra_parameters_input"
+fi
+
+command="nextflow run $version $input $outdir -profile singularity $study_name $filtering_min_abundance $filtering_min_samples $filtering_min_proportion $filtering_grouping_var $exploratory_clustering_method $exploratory_cor_method $exploratory_n_features $exploratory_whisker_distance $exploratory_mad_threshold $exploratory_main_variable $exploratory_palette_name  $iGenomes_base $genome $gtf  $contrasts $matrix $observations_id_col $observations_type $observations_name_col $features_id_col $features_name_col $features_type $sizefactors_from_controls $control_features $features_metadata_cols $features $differential_file_suffix $differential_feature_id_column $differential_fc_column $differential_pval_column $differential_qval_column $differential_min_fold_change $differential_max_pval $differential_max_qval $differential_feature_name_column $differential_foldchanges_logged $differential_palette_name $differential_subset_to_contrast_samples $deseq2_test $deseq2_fit_type $deseq2_sf_type $deseq2_min_replicates_for_replace $deseq2_use_t $deseq2_independent_filtering $deseq2_lfc_threshold $deseq2_alt_hypothesis $deseq2_p_adjust_method $deseq2_alpha $deseq2_minmu $deseq2_vs_method $deseq2_shrink_lfc $deseq2_vs_blind $deseq2_vst_nsub $gsea_run $gsea_permute $gsea_nperm $gsea_scoring_scheme $gsea_metric $gsea_sort $gsea_order $gsea_set_max $gsea_set_min $gsea_norm $gsea_rnd_type $gsea_make_sets $gsea_median $gsea_num $gsea_plot_top_x $gsea_rnd_seed $gsea_save_rnd_lists $gsea_zip_report $gsea_gene_sets $shinyngs_build_app $shinyngs_deploy_to_shinyapps_io $shinyngs_shinyapps_account $shinyngs_shinyapps_app_name $shinyngs_guess_unlog_matrices $resume $extra_parameters"
+
+echo $command
+eval $command

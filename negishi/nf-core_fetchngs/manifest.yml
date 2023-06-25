@@ -1,0 +1,9 @@
+---
+name: fetchngs
+category: Interactive Apps
+subcategory: nf-core pipelines
+role: batch_connect
+description: |
+  This app will launch the fetchngs pipeline developed by nf-core community. 
+  More information about the pipeline can be found here (https://nf-co.re/fetchngs/).
+

@@ -1,0 +1,381 @@
+#!/usr/bin/env bash
+
+# Clean the environment
+module purge
+
+# Go to workding directory
+workdir=<%= context.workdir %>
+
+if [ ! -d "$workdir" ]
+then
+	echo "$workdir does not exist."
+	mkdir -p $workdir
+fi
+cd $workdir
+
+# Load the required module
+module load nextflow
+
+module list
+
+# Pipeline parameters
+protocol_input=<%= context.protocol %>
+fasta_input=<%= context.fasta %>
+mirgenedb_input=<%= context.mirgenedb %>
+mirtrace_species_input=<%= context.mirtrace_species %>
+mirgenedb_specie_input=<%= context.mirgenedb_specie %>
+mirna_gtf_input=<%= context.mirna_gtf %>
+mirgenedb_gff_input=<%= context.mirgenedb_gff %>
+mature_input=<%= context.mature %>
+mirgenedb_mature_input=<%= context.mirgenedb_mature %>
+hairpin_input=<%= context.hairpin %>
+mirgenedb_hairpin_input=<%= context.mirgenedb_hairpin %>
+bowtie_index_input=<%= context.bowtie_index %>
+save_reference_input=<%= context.save_reference %>
+clip_r1_input=<%= context.clip_r1 %>
+three_prime_clip_r1_input=<%= context.three_prime_clip_r1 %>
+three_prime_adapter_input=<%= context.three_prime_adapter %>
+trim_fastq_input=<%= context.trim_fastq %>
+fastp_min_length_input=<%= context.fastp_min_length %>
+fastp_max_length_input=<%= context.fastp_max_length %>
+save_trimmed_fail_input=<%= context.save_trimmed_fail %>
+fastp_known_mirna_adapters_input=<%= context.fastp_known_mirna_adapters %>
+filter_contamination_input=<%= context.filter_contamination %>
+rrna_input=<%= context.rrna %>
+trna_input=<%= context.trna %>
+cdna_input=<%= context.cdna %>
+ncrna_input=<%= context.ncrna %>
+pirna_input=<%= context.pirna %>
+other_contamination_input=<%= context.other_contamination %>
+skip_fastqc_input=<%= context.skip_fastqc %>
+skip_mirdeep_input=<%= context.skip_mirdeep %>
+skip_multiqc_input=<%= context.skip_multiqc %>
+skip_fastp_input=<%= context.skip_fastp %>
+resume_input=<%= context.resume %>
+extra_parameters_input="<%= context.extra_parameters %>"
+
+# Test whether input is set
+if [ -z "${input_input// }" ]
+then
+        input=""
+else
+        input="--input $input_input"
+fi
+# Test whether protocol is set
+if [ -z "${protocol_input// }" ]
+then
+        protocol=""
+else
+        protocol="--protocol $protocol_input"
+fi
+# Test whether fasta is set
+if [ -z "${fasta_input// }" ]
+then
+        fasta=""
+else
+        fasta="--fasta $fasta_input"
+fi
+# Test whether mirgenedb is set
+if [ -z "${mirgenedb_input// }" ]
+then
+        mirgenedb=""
+else
+        mirgenedb="--mirgenedb $mirgenedb_input"
+fi
+# Test whether mirtrace_species is set
+if [ -z "${mirtrace_species_input// }" ]
+then
+        mirtrace_species=""
+else
+        mirtrace_species="--mirtrace_species $mirtrace_species_input"
+fi
+# Test whether mirgenedb_species is set
+if [ -z "${mirgenedb_species_input// }" ]
+then
+        mirgenedb_species=""
+else
+        mirgenedb_species="--mirgenedb_species $mirgenedb_species_input"
+fi
+# Test whether mirna_gtf is set
+if [ -z "${mirna_gtf_input// }" ]
+then
+        mirna_gtf=""
+else
+        mirna_gtf="--mirna_gtf $mirna_gtf_input"
+fi
+# Test whether mirgenedb_gff is set
+if [ -z "${mirgenedb_gff_input// }" ]
+then
+        mirgenedb_gff=""
+else
+        mirgenedb_gff="--mirgenedb_gff $mirgenedb_gff_input"
+fi
+# Test whether mature is set
+if [ -z "${mature_input// }" ]
+then
+        mature=""
+else
+        mature="--mature $mature_input"
+fi
+# Test whether mirgenedb_mature is set
+if [ -z "${mirgenedb_mature_input// }" ]
+then
+        mirgenedb_mature=""
+else
+        mirgenedb_mature="--mirgenedb_mature $mirgenedb_mature_input"
+fi
+# Test whether hairpin is set
+if [ -z "${hairpin_input// }" ]
+then
+        hairpin=""
+else
+        hairpin="--hairpin $hairpin_input"
+fi
+# Test whether mirgenedb_hairpin is set
+if [ -z "${mirgenedb_hairpin_input// }" ]
+then
+        mirgenedb_hairpin=""
+else
+        mirgenedb_hairpin="--mirgenedb_hairpin $mirgenedb_hairpin_input"
+fi
+# Test whether bowtie_index is set
+if [ -z "${bowtie_index_input// }" ]
+then
+        bowtie_index=""
+else
+        bowtie_index="--bowtie_index $bowtie_index_input"
+fi
+# Test whether save_reference is set
+if [ -z "${save_reference_input// }" ]
+then
+        save_reference=""
+else
+        save_reference="--save_reference $save_reference_input"
+fi
+# Test whether clip_r1 is set
+if [ -z "${clip_r1_input// }" ]
+then
+        clip_r1=""
+else
+        clip_r1="--clip_r1 $clip_r1_input"
+fi
+# Test whether three_prime_clip_r1 is set
+if [ -z "${three_prime_clip_r1_input// }" ]
+then
+        three_prime_clip_r1=""
+else
+        three_prime_clip_r1="--three_prime_clip_r1 $three_prime_clip_r1_input"
+fi
+# Test whether three_prime_adapter is set
+if [ -z "${three_prime_adapter_input// }" ]
+then
+        three_prime_adapter=""
+else
+        three_prime_adapter="--three_prime_adapter $three_prime_adapter_input"
+fi
+# Test whether trim_fastq is set
+if [ -z "${trim_fastq_input// }" ]
+then
+        trim_fastq=""
+else
+        trim_fastq="--trim_fastq $trim_fastq_input"
+fi
+# Test whether fastp_min_length is set
+if [ -z "${fastp_min_length_input// }" ]
+then
+        fastp_min_length=""
+else
+        fastp_min_length="--fastp_min_length $fastp_min_length_input"
+fi
+# Test whether fastp_max_length is set
+if [ -z "${fastp_max_length_input// }" ]
+then
+        fastp_max_length=""
+else
+        fastp_max_length="--fastp_max_length $fastp_max_length_input"
+fi
+# Test whether save_trimmed_fail is set
+if [ -z "${save_trimmed_fail_input// }" ]
+then
+        save_trimmed_fail=""
+else
+        save_trimmed_fail="--save_trimmed_fail $save_trimmed_fail_input"
+fi
+# Test whether fastp_known_mirna_adapters is set
+if [ -z "${fastp_known_mirna_adapters_input// }" ]
+then
+        fastp_known_mirna_adapters=""
+else
+        fastp_known_mirna_adapters="--fastp_known_mirna_adapters $fastp_known_mirna_adapters_input"
+fi
+# Test whether filter_contamination is set
+if [ -z "${filter_contamination_input// }" ]
+then
+        filter_contamination=""
+else
+        filter_contamination="--filter_contamination $filter_contamination_input"
+fi
+# Test whether rrna is set
+if [ -z "${rrna_input// }" ]
+then
+        rrna=""
+else
+        rrna="--rrna $rrna_input"
+fi
+# Test whether trna is set
+if [ -z "${trna_input// }" ]
+then
+        trna=""
+else
+        trna="--trna $trna_input"
+fi
+# Test whether cdna is set
+if [ -z "${cdna_input// }" ]
+then
+        cdna=""
+else
+        cdna="--cdna $cdna_input"
+fi
+# Test whether ncrna is set
+if [ -z "${ncrna_input// }" ]
+then
+        ncrna=""
+else
+        ncrna="--ncrna $ncrna_input"
+fi
+# Test whether pirna is set
+if [ -z "${pirna_input// }" ]
+then
+        pirna=""
+else
+        pirna="--pirna $pirna_input"
+fi
+# Test whether other_contamination is set
+if [ -z "${other_contamination_input// }" ]
+then
+        other_contamination=""
+else
+        other_contamination="--other_contamination $other_contamination_input"
+fi
+# Test whether skip_fastqc is set
+if [ -z "${skip_fastqc_input// }" ]
+then
+        skip_fastqc=""
+else
+        skip_fastqc="--skip_fastqc $skip_fastqc_input"
+fi
+# Test whether skip_mirdeep is set
+if [ -z "${skip_mirdeep_input// }" ]
+then
+        skip_mirdeep=""
+else
+        skip_mirdeep="--skip_mirdeep $skip_mirdeep_input"
+fi
+# Test whether skip_multiqc is set
+if [ -z "${skip_multiqc_input// }" ]
+then
+        skip_multiqc=""
+else
+        skip_multiqc="--skip_multiqc $skip_multiqc_input"
+fi
+# Test whether skip_fastp is set
+if [ -z "${skip_fastp_input// }" ]
+then
+        skip_fastp=""
+else
+        skip_fastp="--skip_fastp $skip_fastp_input"
+fi
+# Test whether resume is set
+if [ -z "${resume_input// }" ]
+then
+        resume=""
+else
+        resume="--resume $resume_input"
+fi
+# Test whether extra_parameters is set
+if [ -z "${extra_parameters_input// }" ]
+then
+        extra_parameters=""
+else
+        extra_parameters="--extra_parameters $extra_parameters_input"
+fi
+
+# Test whether mirgenedb is set
+if [ $mirgenedb_input -eq 1 ]
+then
+        mirgenedb="--mirgenedb"
+else
+        mirgenedb=""
+fi
+# Test whether trim_fastq is set
+if [ $trim_fastq_input -eq 1 ]
+then
+        trim_fastq="--trim_fastq"
+else
+        trim_fastq=""
+fi
+# Test whether save_trimmed_fail is set
+if [ $save_trimmed_fail_input -eq 1 ]
+then
+        save_trimmed_fail="--save_trimmed_fail"
+else
+        save_trimmed_fail=""
+fi
+# Test whether filter_contamination is set
+if [ $filter_contamination_input -eq 1 ]
+then
+        filter_contamination="--filter_contamination"
+else
+        filter_contamination=""
+fi
+# Test whether skip_fastqc is set
+if [ $skip_fastqc_input -eq 1 ]
+then
+        skip_fastqc="--skip_fastqc"
+else
+        skip_fastqc=""
+fi
+# Test whether skip_mirdeep is set
+if [ $skip_mirdeep_input -eq 1 ]
+then
+        skip_mirdeep="--skip_mirdeep"
+else
+        skip_mirdeep=""
+fi
+# Test whether skip_multiqc is set
+if [ $skip_multiqc_input -eq 1 ]
+then
+        skip_multiqc="--skip_multiqc"
+else
+        skip_multiqc=""
+fi
+# Test whether skip_fastp is set
+if [ $skip_fastp_input -eq 1 ]
+then
+        skip_fastp="--skip_fastp"
+else
+        skip_fastp=""
+fi
+# Test whether resume is set
+if [ $resume_input -eq 1 ]
+then
+        resume="--resume"
+else
+        resume=""
+fi
+# Test whether save_reference is set
+if [ $save_reference_input -eq 1 ]
+then
+        save_reference="--save_reference"
+else
+        save_reference=""
+fi
+
+
+
+echo "Below is the nextflow command you are running:"
+echo "+++++++++++++++++++++++++++++++++++++++++++"
+command="nextflow run $version $input --outdir $output -profile singularity $iGenomes_base $protocol $fasta $mirgenedb $mirtrace_species $mirgenedb_species $mirna_gtf $mirgenedb_gff $mature $mirgenedb_mature $hairpin $mirgenedb_hairpin $bowtie_index $save_reference $clip_r1 $three_prime_clip_r1 $three_prime_adapter $trim_fastq $fastp_min_length $fastp_max_length $save_trimmed_fail $fastp_known_mirna_adapters $filter_contamination $rrna $trna $cdna $ncrna $pirna $other_contamination $skip_fastqc $skip_mirdeep $skip_multiqc $skip_fastp $resume $extra_parameters"
+
+echo $command
+eval $command

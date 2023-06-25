@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+
+# Clean the environment
+module purge
+
+# Go to workding directory
+workdir=<%= context.workdir %>
+
+if [ ! -d "$workdir" ]
+then
+	echo "$workdir does not exist."
+	mkdir -p $workdir
+fi
+cd $workdir
+
+# Load the required module
+module load nextflow
+
+module list
+
+# Pipeline parameters
+version=<%= context.version %>
+input_input=<%= context.input %>
+output=<%= context.output %>
+extra_parameters="<%= context.extra_parameters %>"
+fasta_input="<%= context.fasta %>"
+fasta_fai_input="<%= context.fasta_fai %>"
+chr_input="<%= context.chr %>"
+reference_input="<%= context.reference %>" 
+resume_input=<%= context.resume %>
+no_read_QC_input=<%= context.no_read_QC  %>
+no_stats=<%= context.no_stats  %>
+
+
+
+# Test whether input is set
+if [ -z "${input_input// }" ]
+then
+        echo "you did not provide input file"
+        input=""
+else
+        echo "your input file is: $input_input"
+        input="--input '$input_input'"
+fi
+
+
+# Test whether reference is set
+if [ -z "${reference_input// }" ]
+then
+	echo "Remember to provide your own genome in fasta"
+	reference=""
+	iGenomes_base=""
+else
+        echo "you're using the iGenomes $reference_input"
+	reference="--genome $reference_input"
+	iGenomes_base="--igenomes_base /depot/itap/datasets/igenomes"
+fi
+
+# Test whether fasta is set
+if [ -z "${fasta_input// }" ]
+then
+        echo "you did not provide fasta file"
+        fasta=""
+else
+	echo "you're using your own genome $fasta_input"
+        fasta="--fasta $fasta_input"
+fi
+
+
+# Test whether fasta_fai is set
+if [ -z "${fasta_fai_input// }" ]
+then
+        echo "you did not provide fasta_fai file"
+	fasta_fai=""
+else
+	echo "you're using your own $fasta_fai_input"
+        fasta_fai="--fasta_fai $fasta_fai_input"
+fi
+
+# Test whether chr is set
+if [ -z "${chr_input// }" ]
+then
+	chr=""
+else
+        chr="--chr $chr_input"
+fi
+
+
+# Test whether no_read_QC is set
+if [ $no_read_QC_input -eq 1 ]
+then
+        no_read_QC="--no_read_QC"
+else
+        no_read_QC=""
+fi
+
+# Test whether no_read_QC is set
+if [ $no_stats -eq 1 ]
+then
+        no_stats="--no_stats"
+else
+        no_stats=""
+fi
+
+
+
+# Test whether resume is set
+if [ $resume_input -eq 1 ]
+then
+	echo "You job will resume previous run"
+        resume="-resume"
+else
+	echo "This is a fresh run"
+        resume=""
+fi
+
+
+echo "Below is the nextflow command you are running:"
+echo "+++++++++++++++++++++++++++++++++++++++++++"
+command="nextflow run $version $input --outdir $output -profile singularity $iGenomes_base $reference $fasta $fasta_fai $chr $no_read_QC $no_stats $extra_parameters $resume"
+
+echo $command
+eval $command

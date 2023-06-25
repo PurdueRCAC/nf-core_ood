@@ -1,0 +1,410 @@
+---
+cluster: "negishi"
+attributes:
+  modules: "nf-core"
+
+  queue:
+    label: Queue
+    help: |
+      Please select a queue from the drop-down and enter the number of hours below (up to the max listed above).
+    widget: select
+    options:
+        <%- Purdue::Qlist.qlist("negishi").each do |q| %>
+        <%- tl = q.split("\t")[1].split(/[-:]/)         %>
+        <%- qn = q.split("\t")[0]                       %>
+        <%- if tl.length() == 4         %>
+            <%- days = tl[0].to_f       %>
+            <%- hours = tl[1].to_f      %>
+            <%- minutes = tl[2].to_f    %>
+        <%- else                        %> 
+            <%- days = 0                %>
+            <%- hours = tl[0].to_f      %>
+            <%- minutes = tl[1].to_f    %>
+        <%- end %>
+       <%- hlimit = days*24.0 + hours + minutes / 60.0 %>
+       - [
+        "<%= qn %> (Max <%= hlimit %> hours)", "<%= qn %>",
+        data-max-walltime: <%= hlimit %>,
+        <%- if qn != 'gpu' %>
+        data-hide-num-gpus: true,
+        data-set-num-gpus: 0,
+        <%- end %>
+        ]
+    <%- end -%>    
+
+  num_cores:
+    label: Cores
+    widget: number_field
+    max: 128
+    min: 1
+    value: 1
+    help: |
+        You will receive ~2GB of memory per core requested.
+    
+
+  walltime:
+    label: Wall Time in Hours
+    widget: number_field
+    help: |
+        Number of hours you are requesting for your job.
+    max: 1
+    min: 0.25
+    step: 0.25
+    value: 0.25  
+    
+  version:
+    label: Version
+    widget: select
+    options:
+      - ["2.2.1",	"/apps/biocontainers/nf-core/nf-core-smrnaseq-2.2.1/workflow"]
+
+  reference:
+    label: Name of iGenomes reference(Reference genome options)
+    widget: select
+    required: false
+    options:
+      - ['None', ' ']      
+      - ['GRCh37', 'GRCh37']
+      - ['GRCh38', 'GRCh38']
+      - ['GRCm38', 'GRCm38']
+      - ['TAIR10', 'TAIR10']
+      - ['EB2', 'EB2']
+      - ['UMD3.1', 'UMD3.1']
+      - ['WBcel235', 'WBcel235']
+      - ['CanFam3.1', 'CanFam3.1']
+      - ['GRCz10', 'GRCz10']
+      - ['BDGP6', 'BDGP6']
+      - ['EquCab2', 'EquCab2']
+      - ['EB1', 'EB1']
+      - ['Galgal4', 'Galgal4']
+      - ['Gm01', 'Gm01']
+      - ['Mmul_1', 'Mmul_1']
+      - ['IRGSP-1.0', 'IRGSP-1.0']
+      - ['CHIMP2.1.4', 'CHIMP2.1.4']
+      - ['Rnor_5.0', 'Rnor_5.0']
+      - ['Rnor_6.0', 'Rnor_6.0']
+      - ['R64-1-1', 'R64-1-1']
+      - ['EF2', 'EF2']
+      - ['Sbi1', 'Sbi1']
+      - ['Sscrofa10.2', 'Sscrofa10.2']
+      - ['AGPv3', 'AGPv3']
+      - ['hg38', 'hg38']
+      - ['hg19', 'hg19']
+      - ['mm10', 'mm10']
+      - ['bosTau8', 'bosTau8']
+      - ['ce10', 'ce10']
+      - ['canFam3', 'canFam3']
+      - ['danRer10', 'danRer10']
+      - ['dm6', 'dm6']
+      - ['equCab2', 'equCab2']
+      - ['galGal4', 'galGal4']
+      - ['panTro4', 'panTro4']
+      - ['rn6', 'rn6']
+      - ['sacCer3', 'sacCer3']
+      - ['susScr3', 'susScr3']
+
+  mirgenedb:
+    label: mirgenedb(Reference genome options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Boolean whether MirGeneDB should be used instead of miRBase"
+  
+  mirtrace_species:
+    widget: text_field
+    required: false
+    value: ""
+    label: mirtrace_species(Reference genome options)
+    help: "Species for miRTrace."
+
+  mirgenedb_species:
+    widget: text_field
+    required: false
+    value: ""
+    label: mirgenedb(Reference genome options)
+    help: "Species of MirGeneDB."
+
+  fasta:
+    widget: text_field
+    required: false
+    value: " "
+    label: Path to fasta of your own genome(Reference genome options)
+    help: |
+        This is required if your genome is not included in iGenomes. 
+
+  mirna_gtf:
+    widget: text_field
+    required: false
+    value: ""
+    label: mirna_gtf(Reference genome options)
+    help: "GFF/GTF file with coordinates positions of precursor and miRNAs."
+ 
+  mirgenedb_gff:
+    widget: text_field
+    required: false
+    value: ""
+    label: mirgenedb_gff(Reference genome options)
+    help: "GFF/GTF file with coordinates positions of precursor and miRNAs."
+
+  mature:
+    widget: text_field
+    required: false
+    value: "https://mirbase.org/ftp/CURRENT/mature.fa.gz"
+    label: mature(Reference genome options)
+    help: "Path to FASTA file with mature miRNAs."
+
+  mirgenedb_mature:
+    widget: text_field
+    required: false
+    value: ""
+    label: mirgenedb_mature(Reference genome options)
+    help: "Path to FASTA file with MirGeneDB mature miRNAs."
+
+  hairpin:
+    widget: text_field
+    required: false
+    value: "https://mirbase.org/ftp/CURRENT/hairpin.fa.gz"
+    label: hairpin(Reference genome options)
+    help: "Path to FASTA file with miRNAs precursors."
+
+  mirgenedb_hairpin:
+    widget: text_field
+    required: false
+    value: ""
+    label: mirgenedb_hairpin(Reference genome options)
+    help: "Path to FASTA file with miRNAs precursors."
+
+  bowtie_index:
+    widget: text_field
+    required: false
+    value: ""
+    label: bowtie_index(Reference genome options)
+    help: "Path to a Bowtie 1 index directory"
+    
+  save_reference:
+    label: Save reference(Reference genome options)
+    widget: check_box      
+    checked_value: 1
+    unchecked_value: 0
+    help: |
+          If you are using the pipeline to build new indices, you can save them locally for future use. 
+
+  input:
+    data-filepicker: true
+    data-target-file-type: files
+    label: Input
+    readonly: false
+    help: | 
+        The samplesheet containing information about the samples in the experiment.
+
+  workdir:
+    label: "Working Directory"
+    data-filepicker: true
+    data-target-file-type: dirs  # Valid values are: files, dirs, or both
+    readonly: false
+    help: "Select your project directory; defaults to $HOME"
+
+  output:
+    widget: "text_field"
+    required: true
+    label: "Output directory Name"
+    help: "Where the results will be going to (relative to the working directory field above). Example: smrnaseq.out"
+
+  protocol:
+    widget: text_field
+    required: false
+    value: "illumina"
+    label: protocol
+    help: "Protocol for constructing smRNA-seq libraries."
+   
+  clip_r1:
+    widget: text_field
+    required: false
+    value: ""
+    label: clip_r1(Trimming options)
+    help: "The number of basepairs to remove from the 5' end of read 1."
+    
+  three_prime_clip_r1:
+    label: three_prime_clip_r1(Trimming options)
+    widget: text_field
+    required: false
+    value: ""
+    help: "The number of basepairs to remove from the 3' end of read 1 AFTER adapter/quality trimming has been performed."
+  
+  three_prime_adapter:
+    widget: text_field
+    required: false
+    value: "TGGAATTCTCGGGTGCCAAGG"
+    label: three_prime_adapter(Trimming options)
+    help: "Sequencing adapter sequence to use for trimming."
+
+  trim_fastq:
+    label: trim_fastq(Trimming options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Trim FastQ files"
+
+  fastp_min_length:
+    widget: text_field
+    required: false
+    value: "17"
+    label: fastp_min_length(Trimming options)
+    help: "Minimum filter length for raw reads."
+
+  fastp_max_length:
+    widget: text_field
+    required: false
+    value: "40"
+    label: fastp_max_length(Trimming options)
+    help: "Maximum filter length for raw reads."
+
+  save_trimmed_fail:
+    label: save_trimmed_fail(Trimming options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Save reads failing trimming."
+
+  fastp_known_mirna_adapters:
+    widget: text_field
+    required: false
+    value: "${projectDir}/assets/known_adapters.fa"
+    label: fastp_known_mirna_adapters(Trimming options)
+    help: "FastA with known miRNA adapter sequences for adapter trimming."
+
+  filter_contamination:
+    label: filter_contamination(Contamination filter options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Enables the contamination filtering."
+
+  rrna:
+    widget: text_field
+    required: false
+    value: ""
+    label: rrna(Contamination filter options)
+    help: "Path to the rRNA fasta file to be used as contamination database."
+
+  trna:
+    widget: text_field
+    required: false
+    value: ""
+    label: trna(Contamination filter options)
+    help: "Path to the tRNA fasta file to be used as contamination database."
+
+  cdna:
+    widget: text_field
+    required: false
+    value: "" 
+    label: cdna(Contamination filter options)
+    help: "Path to the cDNA fasta file to be used as contamination database."
+
+  ncrna:
+    widget: text_field
+    required: false
+    value: ""
+    label: ncrna(Contamination filter options)
+    help: "Path to the ncRNA fasta file to be used as contamination database."
+
+  pirna:
+    widget: text_field
+    required: false
+    value: ""
+    label: pirna(Contamination filter options)
+    help: "Path to the piRNA fasta file to be used as contamination database."
+
+  other_contamination:
+    widget: text_field
+    required: false
+    value: ""
+    label: other_contamination(Contamination filter options)
+    help: "Path to an additional fasta file to be used as contamination database."
+
+  skip_multiqc:
+    label: skip_multiqc(Skipping pipeline steps)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip MultiQC Report"
+
+  skip_fastqc:
+    label: skip_fastqc(Skipping pipeline steps)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip FastQC"
+
+  skip_mirdeep:
+    label: skip_mirdeep(Skipping pipeline steps)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip FastQC"
+
+  skip_fastp:
+    label: skip_fastp(Skipping pipeline steps)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip FastP"
+
+  resume:
+    label: Resume
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: |
+           Resume previous run if found
+
+  extra_parameters:
+    widget: text_field
+    required: false
+    label: Extra parameters
+    help: |
+           Extra parameters to use in the pipeline. Multiple space-separated parameters can be used.
+
+form:
+  - queue
+  - walltime
+  - num_cores
+  - version
+  - input
+  - protocol
+  - workdir
+  - output
+  - reference
+  - fasta
+  - mirgenedb
+  - mirtrace_species
+  - mirgenedb_specie
+  - mirna_gtf
+  - mirgenedb_gff
+  - mature
+  - mirgenedb_mature
+  - hairpin
+  - mirgenedb_hairpin
+  - bowtie_index
+  - save_reference
+  - clip_r1
+  - three_prime_clip_r1
+  - three_prime_adapter
+  - trim_fastq
+  - fastp_min_length
+  - fastp_max_length
+  - save_trimmed_fail
+  - fastp_known_mirna_adapters
+  - filter_contamination
+  - rrna
+  - trna
+  - cdna
+  - ncrna
+  - pirna
+  - other_contamination
+  - skip_fastqc
+  - skip_mirdeep
+  - skip_multiqc
+  - skip_fastp
+  - resume
+  - extra_parameters

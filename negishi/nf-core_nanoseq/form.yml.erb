@@ -1,0 +1,415 @@
+---
+cluster: "negishi"
+attributes:
+  modules: "nf-core"
+
+  queue:
+    label: Queue
+    help: |
+      Please select a queue from the drop-down and enter the number of hours below (up to the max listed above).
+    widget: select
+    options:
+        <%- Purdue::Qlist.qlist("negishi").each do |q| %>
+        <%- tl = q.split("\t")[1].split(/[-:]/)         %>
+        <%- qn = q.split("\t")[0]                       %>
+        <%- if tl.length() == 4         %>
+            <%- days = tl[0].to_f       %>
+            <%- hours = tl[1].to_f      %>
+            <%- minutes = tl[2].to_f    %>
+        <%- else                        %> 
+            <%- days = 0                %>
+            <%- hours = tl[0].to_f      %>
+            <%- minutes = tl[1].to_f    %>
+        <%- end %>
+       <%- hlimit = days*24.0 + hours + minutes / 60.0 %>
+       - [
+        "<%= qn %> (Max <%= hlimit %> hours)", "<%= qn %>",
+        data-max-walltime: <%= hlimit %>,
+        <%- if qn != 'gpu' %>
+        data-hide-num-gpus: true,
+        data-set-num-gpus: 0,
+        <%- end %>
+        ]
+    <%- end -%>    
+
+  num_cores:
+    label: Cores
+    widget: number_field
+    max: 128
+    min: 1
+    value: 1
+    help: |
+        You will receive ~2GB of memory per core requested.
+    
+
+  walltime:
+    label: Wall Time in Hours
+    widget: number_field
+    help: |
+        Number of hours you are requesting for your job.
+    max: 1
+    min: 0.25
+    step: 0.25
+    value: 0.25  
+    
+  version:
+    label: Version
+    widget: select
+    options:
+      - ["3.1.0",	"/apps/biocontainers/nf-core/nf-core-nanoseq-3.1.0/workflow"]
+
+  protocol:
+    label: protocol
+    widget: select
+    required: false
+    options:
+       - [
+         'DNA', '--protocol DNA',
+         ]
+       - [
+         'cDNA', '--protocol cDNA',
+         ]
+       - [
+         'directRNA', '--protocol directRNA',
+         ]
+    help: "Input sample type. Valid options: 'DNA', 'cDNA', and 'directRNA'."
+ 
+  input:
+    data-filepicker: true
+    data-target-file-type: both
+    label: input
+    readonly: false
+    help: "Path to comma-separated file containing information about the samples in the experiment."
+
+  input_path:
+    data-filepicker: true
+    data-target-file-type: both
+    label: input_path(Demultiplexing options)
+    readonly: false
+    help: "Path to Nanopore run directory files (e.g. 'fastq_pass/*') or a basecalled fastq file that requires demultiplexing." 
+  
+  barcode_kit:
+    widget: text_field
+    required: false
+    value: ""
+    label: barcode_kit(Demultiplexing options)
+    help: "Barcode kit used to perform the sequencing e.g. 'SQK-PBK004'."
+
+  barcode_both_ends:
+    label: barcode_both_ends(Demultiplexing options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Require barcode on both ends for basecaller."
+
+  trim_barcodes:
+    label: trim_barcodes(Demultiplexing options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Trim barcodes from the output sequences in the FastQ files from basecaller."
+
+  qcat_min_score:
+    widget: text_field
+    required: false
+    value: "60"
+    label: qcat_min_score(Demultiplexing options)
+    help: "Specify the minimum quality score for qcat in the range 0-100."
+
+  qcat_detect_middle:
+    label: qcat_detect_middle(Demultiplexing options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Search for adapters in the whole read by applying the '--detect-middle' parameter in qcat."
+
+  skip_demultiplexing:
+    label: skip_demultiplexing(Demultiplexing options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip demultiplexing with qcat."
+
+  run_nanolyse:
+    label: run_nanolyse(Demultiplexing options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Filter reads from FastQ files using NanoLyse."
+
+  nanolyse_fasta:
+    data-filepicker: true
+    data-target-file-type: files
+    label: nanolyse_fasta(Demultiplexing options)
+    readonly: false
+    help: "Fasta file to be filtered against using NanoLyse."
+
+  workdir:
+    label: "Working Directory"
+    data-filepicker: true
+    data-target-file-type: dirs  # Valid values are: files, dirs, or both
+    readonly: false
+    help: "Select your project directory; defaults to $HOME"
+
+  output:
+    widget: "text_field"
+    required: true
+    label: "Output directory Name"
+    help: "Where the results will be going to (relative to the working directory field above). Example: nanoseq.out"
+
+  aligner:
+    label: aligner(Alignment options)
+    widget: select
+    required: false
+    options:
+       - ["",""]
+       - [
+         'minimap2', '--aligner minimap2',
+         ]
+       - [
+         'graphmap2', '--aligner graphmap2',
+          ]
+          
+  stranded:
+    label: stranded(Alignment options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Specifies if the data is strand-specific. Automatically activated when using '--protocol directRNA'."
+
+  save_align_intermeds:
+    label: save_align_intermeds(Alignment options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Save the '.sam' files from the alignment step - not done by default."
+
+  skip_alignment:
+    label: skip_alignment(Alignment options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip alignment and downstream processes."
+
+  call_variants:
+    label: call_variants(Variant calling options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Specifies if variant calling will executed."
+
+  variant_caller:
+    label: variant_caller(Variant calling options)
+    widget: select
+    required: false
+    options:
+      - ['medaka', '--variant_caller medaka']
+      - ['deepvariant', '--variant_caller deepvariant']
+      - ['pepper_margin_deepvariant', '--variant_caller pepper_margin_deepvariant']
+    help: "Specifies the variant caller that will used to call small variants. Variant calling is only available if '--call_variants' is set and the protocol is set to DNA."
+
+  structural_variant_caller:
+    label: structural_variant_caller(Variant calling options)
+    widget: select
+    required: false
+    options:
+      - ['sniffles', '--structural_variant_caller sniffles']
+      - ['cutesv', '--structural_variant_caller cutesv']
+    help: "Specifies the variant caller that will be used to call structural variants. Structural variant calling is only available if '--call_variants' is set and the protocol is set to DNA." 
+
+  split_mnps:
+    label: split_mnps(Variant calling options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Specifies if MNPs will be split into SNPs when using medaka."
+
+  phase_vcf:
+    label: phase_vcf(Variant calling options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Specifies if vcf will be phased when using medaka."
+
+  skip_vc:
+    label: skip_vc(Variant calling options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip variant calling."
+
+  skip_sv:
+    label: skip_sv(Variant calling options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip structural variant calling."
+
+  quantification_method:
+    label: quantification_method(Differential analysis options)
+    widget: select
+    required: false
+    options:
+      - ['bambu', '--quantification_method bambu']
+      - ['stringtie2', '--quantification_method stringtie2']
+    help: "Specifies the transcript quantification method to use. Only available when protocol is cDNA or directRNA."
+
+  skip_quantification:
+    label: skip_quantification(Differential analysis options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: |
+           Skip transcript quantification and differential analysis.
+
+  skip_differential_analysis:
+    label: skip_differential_analysis(Differential analysis options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip differential analysis with DESeq2 and DEXSeq."
+
+  jaffal_ref_dir:
+    widget: text_field
+    required: false
+    value: " "
+    label: jaffal_ref_dir(RNA fusion analysis options)
+    help: "Specifies the reference directory for JAFFAL, default: 'for_jaffal'."
+
+  skip_fusion_analysis:
+    label: skip_fusion_analysis(RNA fusion analysis options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip differential analysis with DESeq2 and DEXSeq."
+
+  skip_modification_analysis:
+    label: skip_modification_analysis(RNA modification analysis options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip RNA modification analysis."
+
+  skip_xpore:
+    label: skip_xpore(RNA modification analysis options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip differential modification analysis with xpore."
+
+  skip_m6anet:
+    label: skip_m6anet(RNA modification analysis options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip m6A detection with m6anet."
+
+  skip_bigbed:
+    label: skip_bigbed(Process skipping options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip BigBed file generation."
+ 
+  skip_bigwig:
+    label: skip_bigwig(Process skipping options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip BigWig file generation."
+
+  skip_nanoplot:
+    label: skip_nanoplot(Process skipping options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip NanoPlot."
+
+  skip_nanoplot:
+    label: skip_nanoplot(Process skipping options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: 
+
+  skip_fastqc:
+    label: skip_fastqc(Process skipping options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip FastQC."
+
+  skip_multiqc:
+    label: skip_multiqc(Process skipping options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip MultiQC."
+
+  skip_qc:
+    label: skip_qc(Process skipping options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip all QC steps apart from MultiQC."
+          
+  resume:
+    label: Resume
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: |
+           Resume previous run if found
+
+  extra_parameters:
+    widget: text_field
+    required: false
+    label: Extra parameters
+    help: |
+           Extra parameters to use in the pipeline. Multiple space-separated parameters can be used.
+
+form:
+  - queue
+  - walltime
+  - num_cores
+  - version
+  - input
+  - protocol
+  - workdir
+  - output
+  - input_path
+  - barcode_kit
+  - barcode_both_ends
+  - trim_barcodes
+  - qcat_min_score
+  - qcat_detect_middle
+  - skip_demultiplexing
+  - run_nanolyse
+  - nanolyse_fasta
+  - aligner
+  - stranded
+  - save_align_intermeds
+  - skip_alignment
+  - call_variants
+  - variant_caller
+  - structural_variant_caller
+  - split_mnps
+  - phase_vcf
+  - skip_vc
+  - skip_sv
+  - quantification_method
+  - skip_quantification
+  - skip_differential_analysis
+  - jaffal_ref_dir
+  - skip_fusion_analysis
+  - skip_modification_analysis
+  - skip_xpore
+  - skip_m6anet
+  - skip_bigbed
+  - skip_bigwig
+  - skip_nanoplot
+  - skip_fastqc
+  - skip_multiqc
+  - skip_qc
+  - resume
+  - extra_parameters

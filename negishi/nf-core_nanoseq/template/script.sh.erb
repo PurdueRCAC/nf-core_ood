@@ -1,0 +1,341 @@
+#!/usr/bin/env bash
+
+# Clean the environment
+module purge
+
+# Go to workding directory
+workdir=<%= context.workdir %>
+
+if [ ! -d "$workdir" ]
+then
+	echo "$workdir does not exist."
+	mkdir -p $workdir
+fi
+cd $workdir
+
+# Load the required module
+module load nextflow
+
+module list
+
+# Pipeline parameters
+iGenomes_base="--igenomes_base /depot/itap/datasets/igenomes"
+queue_input=<%= context.queue %>
+walltime_input=<%= context.walltime %>
+num_cores_input=<%= context.num_cores %>
+version=<%= context.version %>
+input_input=<%= context.input %>
+protocol="<%= context.protocol %>"
+output=<%= context.output %>
+input_path_input=<%= context.input_path %>
+barcode_kit_input="<%= context.barcode_kit %>"
+barcode_both_ends_input=<%= context.barcode_both_ends %>
+trim_barcodes_input=<%= context.trim_barcodes %>
+qcat_min_score_input=<%= context.qcat_min_score %>
+qcat_detect_middle_input=<%= context.qcat_detect_middle %>
+skip_demultiplexing_input=<%= context.skip_demultiplexing %>
+run_nanolyse_input=<%= context.run_nanolyse %>
+nanolyse_fasta_input=<%= context.nanolyse_fasta %>
+aligner="<%= context.aligner %>"
+stranded_input=<%= context.stranded %>
+save_align_intermeds_input=<%= context.save_align_intermeds %>
+skip_alignment_input=<%= context.skip_alignment %>
+call_variants_input=<%= context.call_variants %>
+variant_caller="<%= context.variant_caller %>"
+structural_variant_caller="<%= context.structural_variant_caller %>"
+split_mnps_input=<%= context.split_mnps %>
+phase_vcf_input=<%= context.phase_vcf %>
+skip_vc_input=<%= context.skip_vc %>
+skip_sv_input=<%= context.skip_sv %>
+quantification_method="<%= context.quantification_method %>"
+skip_quantification_input=<%= context.skip_quantification %>
+skip_differential_analysis_input=<%= context.skip_differential_analysis %>
+jaffal_ref_dir_input=<%= context.jaffal_ref_dir %>
+skip_fusion_analysis_input=<%= context.skip_fusion_analysis %>
+skip_modification_analysis_input=<%= context.skip_modification_analysis %>
+skip_xpore_input=<%= context.skip_xpore %>
+skip_m6anet_input=<%= context.skip_m6anet %>
+skip_bigbed_input=<%= context.skip_bigbed %>
+skip_bigwig_input=<%= context.skip_bigwig %>
+skip_nanoplot_input=<%= context.skip_nanoplot %>
+skip_fastqc_input=<%= context.skip_fastqc %>
+skip_multiqc_input=<%= context.skip_multiqc %>
+skip_qc_input=<%= context.skip_qc %>
+resume_input=<%= context.resume %>
+extra_parameters_input="<%= context.extra_parameters %>"
+
+# Test whether input is set
+if [ -z "${input_input// }" ]
+then
+        input=""
+else
+        input="--input $input_input"
+fi
+
+
+# Test whether input_path is set
+if [ -z "${input_path_input// }" ]
+then
+        input_path=""
+
+else
+        input_path="--input_path $input_path_input"
+fi
+
+# Test whether barcode_kit is set
+if [ -z "${barcode_kit_input// }" ]
+then
+        barcode_kit=""
+
+else
+        barcode_kit="--barcode_kit $barcode_kit_input"
+fi
+# Test whether qcat_min_score is set
+if [ -z "${qcat_min_score_input// }" ]
+then
+        qcat_min_score=""
+
+else
+        qcat_min_score="--qcat_min_score $qcat_min_score_input"
+fi
+
+# Test whether nanolyse_fasta is set
+if [ -z "${nanolyse_fasta_input// }" ]
+then
+        nanolyse_fasta=""
+
+else
+        nanolyse_fasta="--nanolyse_fasta $nanolyse_fasta_input"
+fi
+
+# Test whether jaffal_ref_dir is set
+if [ -z "${jaffal_ref_dir_input// }" ]
+then
+        jaffal_ref_dir=""
+
+else
+        jaffal_ref_dir="--jaffal_ref_dir $jaffal_ref_dir_input"
+fi
+
+if [ $barcode_both_ends_input -eq 1 ]
+then
+        barcode_both_ends="--barcode_both_ends"
+else
+        barcode_both_ends=""
+fi
+
+# Test whether trim_barcodes is set
+if [ $trim_barcodes_input -eq 1 ]
+then
+        trim_barcodes="--trim_barcodes"
+else
+        trim_barcodes=""
+fi
+
+# Test whether qcat_detect_middle is set
+if [ $qcat_detect_middle_input -eq 1 ]
+then
+        qcat_detect_middle="--qcat_detect_middle"
+else
+        qcat_detect_middle=""
+fi
+
+# Test whether skip_demultiplexing is set
+if [ $skip_demultiplexing_input -eq 1 ]
+then
+        skip_demultiplexing="--skip_demultiplexing"
+else
+        skip_demultiplexing=""
+fi
+
+# Test whether run_nanolyse is set
+if [ $run_nanolyse_input -eq 1 ]
+then
+        run_nanolyse="--run_nanolyse"
+else
+        run_nanolyse=""
+fi
+
+# Test whether stranded is set
+if [ $stranded_input -eq 1 ]
+then
+        stranded="--stranded"
+else
+        stranded=""
+fi
+
+# Test whether save_align_intermeds is set
+if [ $save_align_intermeds_input -eq 1 ]
+then
+        save_align_intermeds="--save_align_intermeds"
+else
+        save_align_intermeds=""
+fi
+
+# Test whether skip_alignment is set
+if [ $skip_alignment_input -eq 1 ]
+then
+        skip_alignment="--skip_alignment"
+else
+        skip_alignment=""
+fi
+
+# Test whether call_variants is set
+if [ $call_variants_input -eq 1 ]
+then
+        call_variants="--call_variants"
+else
+        call_variants=""
+fi
+
+# Test whether split_mnps is set
+if [ $split_mnps_input -eq 1 ]
+then
+        split_mnps="--split_mnps"
+else
+        split_mnps=""
+fi
+
+# Test whether phase_vcf is set
+if [ $phase_vcf_input -eq 1 ]
+then
+        phase_vcf="--phase_vcf"
+else
+        phase_vcf=""
+fi
+
+# Test whether skip_vc is set
+if [ $skip_vc_input -eq 1 ]
+then
+        skip_vc="--skip_vc"
+else
+        skip_vc=""
+fi
+
+# Test whether skip_sv is set
+if [ $skip_sv_input -eq 1 ]
+then
+        skip_sv="--skip_sv"
+else
+        skip_sv=""
+fi
+
+# Test whether skip_quantification is set
+if [ $skip_quantification_input -eq 1 ]
+then
+        skip_quantification="--skip_quantification"
+else
+        skip_quantification=""
+fi
+
+# Test whether skip_differential_analysis is set
+if [ $skip_differential_analysis_input -eq 1 ]
+then
+        skip_differential_analysis="--skip_differential_analysis"
+else
+        skip_differential_analysis=""
+fi
+
+# Test whether skip_fusion_analysis is set
+if [ $skip_fusion_analysis_input -eq 1 ]
+then
+        skip_fusion_analysis="--skip_fusion_analysis"
+else
+        skip_fusion_analysis=""
+fi
+
+# Test whether skip_modification_analysis is set
+if [ $skip_modification_analysis_input -eq 1 ]
+then
+        skip_modification_analysis="--skip_modification_analysis"
+else
+        skip_modification_analysis=""
+fi
+
+# Test whether skip_xpore is set
+if [ $skip_xpore_input -eq 1 ]
+then
+        skip_xpore="--skip_xpore"
+else
+        skip_xpore=""
+fi
+
+# Test whether skip_m6anet is set
+if [ $skip_m6anet_input -eq 1 ]
+then
+        skip_m6anet="--skip_m6anet"
+else
+        skip_m6anet=""
+fi
+
+# Test whether skip_bigbed is set
+if [ $skip_bigbed_input -eq 1 ]
+then
+        skip_bigbed="--skip_bigbed"
+else
+        skip_bigbed=""
+fi
+
+# Test whether skip_bigwig is set
+if [ $skip_bigwig_input -eq 1 ]
+then
+        skip_bigwig="--skip_bigwig"
+else
+        skip_bigwig=""
+fi
+
+# Test whether skip_nanoplot is set
+if [ $skip_nanoplot_input -eq 1 ]
+then
+        skip_nanoplot="--skip_nanoplot"
+else
+        skip_nanoplot=""
+fi
+
+# Test whether skip_fastqc is set
+if [ $skip_fastqc_input -eq 1 ]
+then
+        skip_fastqc="--skip_fastqc"
+else
+        skip_fastqc=""
+fi
+
+# Test whether skip_multiqc is set
+if [ $skip_multiqc_input -eq 1 ]
+then
+        skip_multiqc="--skip_multiqc"
+else
+        skip_multiqc=""
+fi
+
+# Test whether skip_qc is set
+if [ $skip_qc_input -eq 1 ]
+then
+        skip_qc="--skip_qc"
+else
+        skip_qc=""
+fi
+
+# Test whether resume is set
+if [ $resume_input -eq 1 ]
+then
+        echo "You job will resume previous run"
+        resume="-resume"
+else
+        echo "This is a fresh run"
+        resume=""
+fi
+
+
+echo "Below is the nextflow command you are running:"
+echo "+++++++++++++++++++++++++++++++++++++++++++"
+
+#Check protocol is DNA nor not
+
+if [[ "$protocol" == "--protocol DNA" ]]; then
+   command="nextflow run $version $input --outdir $output -profile singularity $iGenomes_base $protocol  $input_path $barcode_kit $barcode_both_ends $trim_barcodes $qcat_min_score $qcat_detect_middle $skip_demultiplexing $run_nanolyse $nanolyse_fasta $aligner $stranded $save_align_intermeds $skip_alignment $call_variants $variant_caller $structural_variant_caller --skip_quantification --skip_fusion_analysis --skip_modification_analysis $split_mnps $phase_vcf $skip_vc $skip_sv  $skip_bigbed $skip_bigwig $skip_nanoplot $skip_fastqc $skip_multiqc $skip_qc $resume $extra_parameters_input"
+else
+   command="nextflow run $version $input --outdir $output -profile singularity $iGenomes_base $protocol  $input_path $barcode_kit $barcode_both_ends $trim_barcodes $qcat_min_score $qcat_detect_middle $skip_demultiplexing $run_nanolyse $nanolyse_fasta $aligner $stranded $save_align_intermeds $skip_alignment  $quantification_method $skip_quantification $skip_differential_analysis $jaffal_ref_dir $skip_fusion_analysis $skip_modification_analysis $skip_xpore $skip_m6anet $skip_bigbed $skip_bigwig $skip_nanoplot $skip_fastqc $skip_multiqc $skip_qc $resume $extra_parameters_input"
+fi
+echo $command
+eval $command

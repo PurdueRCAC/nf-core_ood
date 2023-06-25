@@ -1,0 +1,563 @@
+---
+cluster: "negishi"
+attributes:
+  modules: "nf-core"
+
+  queue:
+    label: Queue
+    help: |
+      Please select a queue from the drop-down and enter the number of hours below (up to the max listed above).
+    widget: select
+    options:
+        <%- Purdue::Qlist.qlist("negishi").each do |q| %>
+        <%- tl = q.split("\t")[1].split(/[-:]/)         %>
+        <%- qn = q.split("\t")[0]                       %>
+        <%- if tl.length() == 4         %>
+            <%- days = tl[0].to_f       %>
+            <%- hours = tl[1].to_f      %>
+            <%- minutes = tl[2].to_f    %>
+        <%- else                        %> 
+            <%- days = 0                %>
+            <%- hours = tl[0].to_f      %>
+            <%- minutes = tl[1].to_f    %>
+        <%- end %>
+       <%- hlimit = days*24.0 + hours + minutes / 60.0 %>
+       - [
+        "<%= qn %> (Max <%= hlimit %> hours)", "<%= qn %>",
+        data-max-walltime: <%= hlimit %>,
+        <%- if qn != 'gpu' %>
+        data-hide-num-gpus: true,
+        data-set-num-gpus: 0,
+        <%- end %>
+        ]
+    <%- end -%>    
+
+  num_cores:
+    label: Cores
+    widget: number_field
+    max: 128
+    min: 1
+    value: 1
+    help: |
+        You will receive ~2GB of memory per core requested.
+    
+
+  walltime:
+    label: Wall Time in Hours
+    widget: number_field
+    help: |
+        Number of hours you are requesting for your job.
+    max: 336
+    min: 0.25
+    step: 0.25
+    value: 0.25 
+    
+  version:
+    label: Version
+    widget: select
+    options:
+      - ["2.0.0",	"/apps/biocontainers/nf-core/nf-core-chipseq-2.0.0/workflow"]
+
+  reference:
+    label: Name of iGenomes reference(Reference genome options)
+    widget: select
+    required: false
+    options:
+      - ['None', ' ']      
+      - ['GRCh37', 'GRCh37']
+      - ['GRCh38', 'GRCh38']
+      - ['GRCm38', 'GRCm38']
+      - ['TAIR10', 'TAIR10']
+      - ['EB2', 'EB2']
+      - ['UMD3.1', 'UMD3.1']
+      - ['WBcel235', 'WBcel235']
+      - ['CanFam3.1', 'CanFam3.1']
+      - ['GRCz10', 'GRCz10']
+      - ['BDGP6', 'BDGP6']
+      - ['EquCab2', 'EquCab2']
+      - ['EB1', 'EB1']
+      - ['Galgal4', 'Galgal4']
+      - ['Gm01', 'Gm01']
+      - ['Mmul_1', 'Mmul_1']
+      - ['IRGSP-1.0', 'IRGSP-1.0']
+      - ['CHIMP2.1.4', 'CHIMP2.1.4']
+      - ['Rnor_5.0', 'Rnor_5.0']
+      - ['Rnor_6.0', 'Rnor_6.0']
+      - ['R64-1-1', 'R64-1-1']
+      - ['EF2', 'EF2']
+      - ['Sbi1', 'Sbi1']
+      - ['Sscrofa10.2', 'Sscrofa10.2']
+      - ['AGPv3', 'AGPv3']
+      - ['hg38', 'hg38']
+      - ['hg19', 'hg19']
+      - ['mm10', 'mm10']
+      - ['bosTau8', 'bosTau8']
+      - ['ce10', 'ce10']
+      - ['canFam3', 'canFam3']
+      - ['danRer10', 'danRer10']
+      - ['dm6', 'dm6']
+      - ['equCab2', 'equCab2']
+      - ['galGal4', 'galGal4']
+      - ['panTro4', 'panTro4']
+      - ['rn6', 'rn6']
+      - ['sacCer3', 'sacCer3']
+      - ['susScr3', 'susScr3']
+  
+  fasta:
+    widget: text_field
+    required: false
+    value: " "
+    label: Path to fasta of your own genome(Reference genome options)
+    help: |
+        This is required if your genome is not included in iGenomes. 
+
+  gtf:
+    widget: text_field
+    required: false
+    value: " "
+    label: gtf(Reference genome options)
+    help: |
+           GTF annotation file for your own genome. 
+
+  gff:
+    widget: text_field
+    required: false
+    value: " "
+    label: gff(Reference genome options)
+    help: |
+            GFF3 annotation file for your own genome.
+
+  gencode:
+    label: gencode(Reference genome options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Specify if your GTF annotation is in GENCODE format."
+
+  star_index:
+    widget: text_field
+    required: false
+    value: " "
+    label: star_index(Reference genome options)
+    help: |
+           Path to directory or tar.gz archive for pre-built STAR index.
+
+
+  hisat2_index:
+    widget: text_field
+    required: false
+    value: " "
+    label: hisat2_index(Reference genome options)
+    help: |
+            Path to directory or tar.gz archive for pre-built HISAT2 index.
+
+  hisat2_build_memory:
+    widget: text_field
+    required: false
+    value: "200.GB"
+    label: hisat2_build_memory(Reference genome options)
+    help: "Minimum memory required to use splice sites and exons in the HiSAT2 index build process."
+
+  rsem_index:
+    widget: text_field
+    required: false
+    value: " "
+    label: rsem_index(Reference genome options)
+    help: |
+            Path to directory or tar.gz archive for pre-built RSEM index.
+
+  salmon_index:
+    widget: text_field
+    required: false
+    value: " "
+    label: salmon_index(Reference genome options)
+    help: |
+            Path to directory or tar.gz archive for pre-built salmon index.
+
+  save_reference:
+    label: Save reference(Reference genome options)
+    widget: check_box      
+    checked_value: 1
+    unchecked_value: 0
+    help: |
+          If you are using the pipeline to build new indices, you can save them locally for future use. 
+
+  input:
+    data-filepicker: true
+    data-target-file-type: files
+    label: Input
+    readonly: false
+    help: | 
+        The samplesheet containing information about the samples in the experiment.
+
+  seq_center:
+    widget: "text_field"
+    required: false
+    label: seq_center
+    help: "Sequencing center information to be added to read group of BAM files."
+
+  read_length:
+    label: read_length
+    widget: select
+    required: false
+    options:
+            - ['50', '50']
+            - ['75', '75']
+            - ['100', '100']
+            - ['150', '150']
+            - ['200', '200']
+
+  workdir:
+    label: "Working Directory"
+    data-filepicker: true
+    data-target-file-type: dirs  # Valid values are: files, dirs, or both
+    readonly: false
+    help: "Select your project directory; defaults to $HOME"
+
+  output:
+    widget: "text_field"
+    required: true
+    label: "Output directory Name"
+    help: "Where the results will be going to (relative to the working directory field above). Example: chipseq.out"
+
+  with_umi:
+    label: with_umi(UMI options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Enable UMI-based read deduplication."
+
+  umitools_extract_method:
+    label: umitools_extract_method(UMI options)
+    widget: select
+    required: false
+    options:
+            - ['string', 'string']
+            - ['regex', 'regex']
+
+  skip_umi_extract:
+    label: skip_umi_extract(UMI options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip the UMI extraction from the read in case the UMIs have been moved to the headers in advance of the pipeline run."
+
+  umitools_bc_pattern:
+    widget: text_field
+    required: false
+    value: " "
+    label: umitools_bc_pattern(UMI options)
+    help: "The UMI barcode pattern to use e.g. 'NNNNNN' indicates that the first 6 nucleotides of the read are from the UMI."
+
+  umitools_bc_pattern2:
+    widget: text_field
+    required: false
+    value: " "
+    label: umitools_bc_pattern2(UMI options)
+    help: "The UMI barcode pattern to use if the UMI is located in read 2"
+
+  umi_discard_read:
+    label: umi_discard_read(UMI options)
+    widget: select
+    required: false
+    options:
+            - ['1', '1']
+            - ['2', '2']
+    help: "After UMI barcode extraction discard either R1 or R2 by setting this parameter to 1 or 2, respectively."
+
+  umitools_umi_separator:
+    widget: text_field
+    required: false
+    value: " "
+    label: umitools_umi_separator(UMI options)
+    help: "The character that separates the UMI in the read name. Most likely a colon if you skipped the extraction with UMI-tools and used other software."
+
+  umitools_grouping_method:
+    label: umitools_grouping_method(UMI options)
+    widget: select
+    required: false
+    options:
+            - ['directional', 'directional']
+            - ['unique', 'unique']
+            - ['percentile', 'percentile']
+            - ['cluster', 'cluster']
+            - ['ajacency', 'ajacency']
+    help: "Method to use to determine read groups by subsuming those with similar UMIs. All methods start by identifying the reads with the same mapping position, but treat similar yet nonidentical UMIs differently."
+        
+  umitools_dedup_stats:
+    label: umitools_dedup_stats(UMI options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Generate output stats when running umi_tools dedup."
+
+  save_umi_intermeds:
+    label: save_umi_intermeds(UMI options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "If this option is specified, intermediate FastQ and BAM files produced by UMI-tools are also saved in the results directory."
+
+
+  trimmer:
+    label: trimmer(Read trimming options)
+    widget: select
+    required: false
+    options:
+      - [
+        'trimgalore', '--trimmer trimgalore',
+        data-hide-extra-fastp-args: true,
+        ]
+      - [
+        'fastp', '--trimmer fastp',
+        data-hide-extra-trimgalore-args: true,
+        ]
+      - [
+         'skip_trimming', '--skip_trimming',
+         data-hide-extra-trimgalore-args: true,
+         data-hide-extra-fastp-args: true,
+         ]
+
+  extra_trimgalore_args:
+    widget: text_field
+    required: false
+    value: " "
+    label: extra_trimgalore_args(Read trimming options)
+    help: "Extra arguments to pass to Trim Galore! command in addition to defaults defined by the pipeline."
+
+  extra_fastp_args:
+    widget: text_field
+    required: false
+    value: " "
+    label: extra_fastp_args(Read trimming options)
+    help: "Extra arguments to pass to fastp command in addition to defaults defined by the pipeline."
+
+  min_trimmed_reads:
+    widget: text_field
+    required: false
+    value: "10000"
+    label: min_trimmed_reads(Read trimming options)
+    help: "Minimum number of trimmed reads below which samples are removed from further processing. Some downstream steps in the pipeline will fail if this threshold is too low."
+
+  save_trimmed:
+    label: save_trimmed(Read trimming options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Save the trimmed FastQ files in the results directory."
+
+  aligner:
+    label: aligner(Alignment options)
+    widget: select
+    required: false
+    options:
+       - [
+         'star_salmon', '--aligner star_salmon',
+          data-hide-hisat2-index: true,
+          data-hide-rsem-index: true, 
+         ]
+       - [
+         'star_rsem', '--aligner star_rsem',
+          data-hide-hisat2-index: true,
+          data-hide-salmon-index: true,
+          data-hide-extra-salmon-quant-args: true,
+         ]
+       - [
+         'hisat2', '--aligner hisat2',
+          data-hide-star-index: true,
+          data-hide-salmon-index: true,
+          data-hide-rsem-index: true,
+          data-hide-extra-star-align-args: true,
+          data-hide-extra-salmon-quant-args: true,
+         ]
+       - [
+         'skip_alignment', '--skip_alignment',
+          data-hide-star-index: true,
+          data-hide-hisat2-index: true,
+          data-hide-rsem-index: true,
+          data-hide-salmon-index: true,
+          data-hide-extra-star-align-args: true,
+          data-hide-extra-salmon-quant-args: true,
+         ]
+  pseudo_aligner:
+    label: pseudo_aligner(Alignment options)
+    widget: select
+    required: false
+    options:
+      - ['', '']
+      - ['salmon', '--pseudo_aligner salmon']
+  
+  extra_star_align_args:
+    widget: text_field
+    required: false
+    value: " "
+    label: extra_star_align_args(Alignment options)
+    help: "Extra arguments to pass to STAR alignment command in addition to defaults defined by the pipeline."
+
+  extra_salmon_quant_args:
+    widget: text_field
+    required: false
+    value: " "
+    label: extra_salmon_quant_args(Alignment options)
+    help: "Extra arguments to pass to Salmon quant command in addition to defaults defined by the pipeline."
+
+  bam_csi_index:
+    label: bam_csi_index(Alignment options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Create a CSI index for BAM files instead of the traditional BAI index. This will be required for genomes with larger chromosome sizes."
+
+  save_unaligned:
+    label: save_unaligned(Alignment options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Where possible, save unaligned reads from either STAR, HISAT2 or Salmon to the results directory."
+ 
+  skip_markduplicates:
+    label: skip_markduplicates(Alignment options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip picard MarkDuplicates step."
+
+  skip_pseudo_alignment:
+    label: skip_pseudo_alignment(Alignment options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip all of the pseudo-alignment-based processes within the pipeline."
+
+  bbsplit_fasta_list:
+    data-filepicker: true
+    data-target-file-type: files
+    label: bbsplit_fasta_list(Read filtering options)
+    readonly: false
+    help: "Path to comma-separated file containing a list of reference genomes to filter reads against with BBSplit. You have to also explicitly set --skip_bbsplit false if you want to use BBSplit."
+
+  bbsplit_index:
+    data-filepicker: true
+    data-target-file-type: both
+    label: bbsplit_index(Read filtering options)
+    readonly: false
+    help: "Path to directory or tar.gz archive for pre-built BBSplit index."
+
+  save_bbsplit_reads:
+    label: save_bbsplit_reads(Read filtering options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "If this option is specified, FastQ files split by reference will be saved in the results directory."
+
+  skip_bbsplit:
+    label: skip_bbsplit(Read filtering options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip BBSplit for removal of non-reference genome reads."
+
+  ribo_database_manifest:
+    data-filepicker: true
+    data-target-file-type: files
+    label: ribo_database_manifest(Read filtering options)
+    readonly: false
+    help: "Text file containing paths to fasta files (one per line) that will be used to create the database for SortMeRNA."
+
+  save_non_ribo_reads:
+    label: save_non_ribo_reads(Read filtering options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "If this option is specified, intermediate FastQ files containing non-rRNA reads will be saved in the results directory."
+
+
+
+  remove_ribo_rna:
+    label: remove_ribo_rna(Read filtering options)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: |
+           Enable the removal of reads derived from ribosomal RNA using SortMeRNA.
+
+  featurecounts_group_type:
+    widget: text_field
+    required: false
+    value: gene_biotype
+    label: featurecounts_group_type(Reference genome options)
+    help: "The attribute type used to group feature types in the GTF file when generating the biotype plot with featureCounts. default: gene_biotype."
+
+  featurecounts_feature_type:
+    widget: text_field
+    required: false
+    value: exon
+    label: featurecounts_feature_type(Reference genome options)
+    help: "By default, the pipeline assigns reads based on the 'exon' attribute within the GTF file."
+
+  resume:
+    label: Resume
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: |
+           Resume previous run if found
+
+  extra_parameters:
+    widget: text_field
+    required: false
+    label: Extra parameters
+    help: |
+           Extra parameters to use in the pipeline. Multiple space-separated parameters can be used.
+
+form:
+  - queue
+  - walltime
+  - num_cores
+  - version
+  - input
+  - workdir
+  - output
+  - with_umi
+  - umitools_extract_method
+  - skip_umi_extract
+  - umitools_bc_pattern
+  - umitools_bc_pattern2
+  - umi_discard_read
+  - umitools_umi_separator
+  - umitools_grouping_method
+  - umitools_dedup_stats
+  - save_umi_intermeds
+  - trimmer
+  - extra_trimgalore_args
+  - extra_fastp_args
+  - remove_ribo_rna
+  - min_trimmed_reads
+  - save_trimmed
+  - bbsplit_fasta_list
+  - bbsplit_index
+  - save_bbsplit_reads
+  - skip_bbsplit
+  - ribo_database_manifest
+  - save_non_ribo_reads
+  - aligner
+  - pseudo_aligner
+  - bam_csi_index
+  - extra_star_align_args
+  - extra_salmon_quant_args
+  - save_unaligned
+  - reference
+  - fasta
+  - gtf
+  - gff
+  - gencode
+  - star_index
+  - hisat2_index
+  - hisat2_build_memory
+  - rsem_index
+  - salmon_index
+  - save_reference
+  - featurecounts_group_type
+  - featurecounts_feature_type
+  - resume
+  - extra_parameters

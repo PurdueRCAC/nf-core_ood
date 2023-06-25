@@ -1,0 +1,400 @@
+---
+cluster: "negishi"
+attributes:
+  modules: "nf-core"
+
+  queue:
+    label: Queue
+    help: |
+      Please select a queue from the drop-down and enter the number of hours below (up to the max listed above).
+    widget: select
+    options:
+        <%- Purdue::Qlist.qlist("negishi").each do |q| %>
+        <%- tl = q.split("\t")[1].split(/[-:]/)         %>
+        <%- qn = q.split("\t")[0]                       %>
+        <%- if tl.length() == 4         %>
+            <%- days = tl[0].to_f       %>
+            <%- hours = tl[1].to_f      %>
+            <%- minutes = tl[2].to_f    %>
+        <%- else                        %> 
+            <%- days = 0                %>
+            <%- hours = tl[0].to_f      %>
+            <%- minutes = tl[1].to_f    %>
+        <%- end %>
+       <%- hlimit = days*24.0 + hours + minutes / 60.0 %>
+       - [
+        "<%= qn %> (Max <%= hlimit %> hours)", "<%= qn %>",
+        data-max-walltime: <%= hlimit %>,
+        <%- if qn != 'gpu' %>
+        data-hide-num-gpus: true,
+        data-set-num-gpus: 0,
+        <%- end %>
+        ]
+    <%- end -%>    
+
+  num_cores:
+    label: Cores
+    widget: number_field
+    max: 128
+    min: 1
+    value: 1
+    help: |
+        You will receive ~2GB of memory per core requested.
+    
+
+  walltime:
+    label: Wall Time in Hours
+    widget: number_field
+    help: |
+        Number of hours you are requesting for your job.
+    max: 1
+    min: 0.25
+    step: 0.25
+    value: 0.25  
+    
+  version:
+    label: Version
+    widget: select
+    options:
+      - ["2.3.1",	"/apps/biocontainers/nf-core/nf-core-scrnaseq-2.3.1/workflow"]
+
+  input:
+    data-filepicker: true
+    data-target-file-type: files
+    label: Input(Required)
+    readonly: false
+    help: |
+        The samplesheet containing information about the samples in the experiment.
+
+  barcode_whitelist:
+    data-filepicker: true
+    data-target-file-type: files
+    label: barcode_whitelist
+    readonly: false
+    help: "If not using the 10X Genomics platform, a custom barcode whitelist can be used with --barcode_whitelist."
+
+  aligner:
+    label: aligner
+    widget: select
+    required: false
+    options:
+       - [
+         'alevin', '--aligner alevin',
+          data-hide-star-index: true,
+          data-hide-star-ignore-sjdbgtf: true,
+          data-hide-seq-center: true,
+          data-hide-star-feature: true,
+          data-hide-kallisto-gene-map: true,
+          data-hide-kallisto-index: true,
+          data-hide-kb-workflow: true,
+          data-hide-cellranger-index: true,
+          data-hide-universc-index: true,
+          data-hide-universc-technology: true,
+         ]
+       - [
+         'kallisto', '--aligner kallisto',
+          data-hide-salmon-index: true,
+          data-hide-txp2gene: true,
+          data-hide-simpleaf-rlen: true,
+          data-hide-star-index: true,
+          data-hide-star-ignore-sjdbgtf: true,
+          data-hide-seq-center: true,
+          data-hide-star-feature: true,
+          data-hide-cellranger-index: true,
+          data-hide-universc-index: true,
+          data-hide-universc-technology: true,
+         ]
+       - [
+         'star', '--aligner star',
+          data-hide-salmon-index: true,
+          data-hide-txp2gene: true,
+          data-hide-simpleaf-rlen: true,
+          data-hide-kallisto-gene-map: true,
+          data-hide-kallisto-index: true,
+          data-hide-kallisto-kb-workflow: true,
+          data-hide-cellranger-index: true,
+          data-hide-universc-index: true,
+          data-hide-universc-technology: true, 
+         ]
+       - [
+         'cellranger', '--aligner cellranger',
+          data-hide-salmon-index: true,
+          data-hide-txp2gene: true,
+          data-hide-simpleaf-rlen: true,
+          data-hide-kallisto-gene-map: true,
+          data-hide-kallisto-index: true,
+          data-hide-kb-workflow: true,
+          data-hide-star-index: true,
+          data-hide-star-ignore-sjdbgtf: true,
+          data-hide-seq-center: true,
+          data-hide-star-feature: true,
+          data-hide-universc-index: true,
+          data-hide-universc-technology: true,
+          ]
+       -  [
+          'universc', '--aligner universc',
+          data-hide-salmon-index: true,
+          data-hide-txp2gene: true,
+          data-hide-simpleaf-rlen: true,
+          data-hide-kallisto-gene-map: true,
+          data-hide-kallisto-index: true,
+          data-hide-kb-workflow: true,
+          data-hide-star-index: true,
+          data-hide-star-ignore-sjdbgtf: true,
+          data-hide-seq-center: true,
+          data-hide-star-feature: true,          
+          data-hide-cellranger-index: true,
+          ]
+
+  protocol:
+    widget: text_field
+    required: false
+    value: " "
+    label: protocol
+    help: "The protocol that was used to generate the single cell data, e.g. 10XV2 (default)."
+
+
+  reference:
+    label: Name of iGenomes reference(Reference genome options)
+    widget: select
+    required: false
+    options:
+      - ['None', ' ']      
+      - ['GRCh37', 'GRCh37']
+      - ['GRCh38', 'GRCh38']
+      - ['GRCm38', 'GRCm38']
+      - ['TAIR10', 'TAIR10']
+      - ['EB2', 'EB2']
+      - ['UMD3.1', 'UMD3.1']
+      - ['WBcel235', 'WBcel235']
+      - ['CanFam3.1', 'CanFam3.1']
+      - ['GRCz10', 'GRCz10']
+      - ['BDGP6', 'BDGP6']
+      - ['EquCab2', 'EquCab2']
+      - ['EB1', 'EB1']
+      - ['Galgal4', 'Galgal4']
+      - ['Gm01', 'Gm01']
+      - ['Mmul_1', 'Mmul_1']
+      - ['IRGSP-1.0', 'IRGSP-1.0']
+      - ['CHIMP2.1.4', 'CHIMP2.1.4']
+      - ['Rnor_5.0', 'Rnor_5.0']
+      - ['Rnor_6.0', 'Rnor_6.0']
+      - ['R64-1-1', 'R64-1-1']
+      - ['EF2', 'EF2']
+      - ['Sbi1', 'Sbi1']
+      - ['Sscrofa10.2', 'Sscrofa10.2']
+      - ['AGPv3', 'AGPv3']
+      - ['hg38', 'hg38']
+      - ['hg19', 'hg19']
+      - ['mm10', 'mm10']
+      - ['bosTau8', 'bosTau8']
+      - ['ce10', 'ce10']
+      - ['canFam3', 'canFam3']
+      - ['danRer10', 'danRer10']
+      - ['dm6', 'dm6']
+      - ['equCab2', 'equCab2']
+      - ['galGal4', 'galGal4']
+      - ['panTro4', 'panTro4']
+      - ['rn6', 'rn6']
+      - ['sacCer3', 'sacCer3']
+      - ['susScr3', 'susScr3']
+  
+  fasta:
+    widget: text_field
+    required: false
+    value: ""
+    label: Path to fasta of your own genome(Reference genome options)
+    help: |
+        This is required if your genome is not included in iGenomes. 
+
+  transcript_fasta:
+    widget: text_field
+    required: false
+    value: " "
+    label: transcript_fasta(Reference genome options)
+    help: |
+            A cDNA FASTA file for your reference genome.
+
+  gtf:
+    widget: text_field
+    required: false
+    value: " "
+    label: gtf(Reference genome options)
+    help: |
+           GTF annotation file for your own genome. 
+    
+  salmon_index:
+    data-filepicker: true
+    data-target-file-type: files          
+    label: salmon_index(Alevin Options)
+    readonly: false
+    help: "This can be used to specify a precomputed Salmon index in the pipeline, in order to skip the generation of required indices by Salmon itself."
+
+  txp2gene:
+    data-filepicker: true
+    data-target-file-type: files
+    label: txp2gene(Alevin Options)
+    readonly: false
+    help: "Path to transcript to gene mapping file. This allows the specification of a transcript to gene mapping file for Salmon Alevin and AlevinQC."
+
+  simpleaf_rlen:
+    widget: text_field
+    required: false
+    value: 91
+    label: simpleaf_rlen(Alevin Options)
+    help: "It is the target read length the index will be built for, using simpleaf."
+
+  star_index:
+    data-filepicker: true
+    data-target-file-type: files          
+    label: star_index(STARSolo Options)
+    readonly: false
+    help: "Specify a path to the precomputed STAR index."
+
+  star_ignore_sjdbgtf:
+    widget: text_field
+    required: false
+    value: " "
+    label: star_ignore_sjdbgtf(STARSolo Options)
+    help: "Ignore the SJDB GTF file."
+
+  seq_center:
+    widget: text_field
+    required: false
+    value: ""
+    label: seq_center(STARSolo Options)
+    help: "Name of sequencing center for BAM read group tag."
+
+  star_feature:
+    widget: text_field
+    required: false
+    value: "Gene"
+    label: star_feature(STARSolo Options)
+    help: "Quantification type of different transcriptomic feature. Use 'GeneFull' on pre-mRNA count for single-nucleus RNA-seq reads. Use 'Gene Velocyto' to generate RNA velocity matrix."
+  
+  kallisto_gene_map:
+    data-filepicker: true
+    data-target-file-type: files
+    readonly: false
+    label: kallisto_gene_map(Kallisto/BUS Options)
+    help: "Specify a Kallisto gene mapping file here. If you don't, this will be automatically created in the Kallisto workflow when specifying a valid '--gtf' file."
+
+  kallisto_index:
+    data-filepicker: true
+    data-target-file-type: files
+    label: kallisto_index(Kallisto/BUS Options)
+    readonly: false
+    help: "Specify a path to the precomputed Kallisto index."
+
+  kb_workflow:
+    widget: text_field
+    required: false
+    value: "standard"
+    label: kb_workflow(Kallisto/BUS Options)
+    help: "Type of workflow. Use lamanno for RNA velocity based on La Manno et al. 2018 logic. Use nucleus for RNA velocity on single-nucleus RNA-seq reads. Use kite for feature barcoding. Use kite: 10xFB for 10x Genomics Feature Barcoding technology. (default: standard)"
+
+  cellranger_index:
+    data-filepicker: true
+    data-target-file-type: files
+    label: cellranger_index(Cellranger Options)
+    readonly: false
+    help: "Specify a pre-calculated cellranger index. Readily prepared indexes can be obtained from the 10x Genomics website."
+
+  universc_index:
+    data-filepicker: true
+    data-target-file-type: files
+    label: universc_index(UniverSC Options)
+    readonly: false
+    help: "Specify a pre-calculated cellranger index. Readily prepared indexes can be obtained from the 10x Genomics website."
+
+  universc_technology:
+    widget: text_field      
+    required: false
+    value: "10x" 
+    label: universc_index(UniverSC Options)
+    readonly: false
+    help: "Specify a single-cell technology, vendor, or platform. See the UniverSC documentation or GitHub repository for more details."
+
+  save_reference:
+    label: Save reference(Reference genome options)
+    widget: check_box      
+    checked_value: 1
+    unchecked_value: 0
+    help: |
+          If you are using the pipeline to build new indices, you can save them locally for future use. 
+
+  workdir:
+    label: "Working Directory(Required)"
+    data-filepicker: true
+    data-target-file-type: dirs  # Valid values are: files, dirs, or both
+    readonly: false
+    help: "Select your project directory; defaults to $HOME"
+
+  output:
+    widget: "text_field"
+    required: true
+    label: "Output directory Name(Required)"
+    help: "Where the results will be going to (relative to the working directory field above). Example: scrnaseq.out"
+
+  skip_multiqc:
+    label: skip_multiqc(Optional)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip MultiQC Report"
+
+  skip_fastqc:
+    label: skip_fastqc(Optional)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Skip FastQC"    
+
+  resume:
+    label: Resume(Optional)
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: |
+           Resume previous run if found
+
+  extra_parameters:
+    widget: text_field
+    required: false
+    label: Extra parameters(Optional)
+    help: |
+           Extra parameters to use in the pipeline. Multiple space-separated parameters can be used.
+
+form:
+  - queue
+  - walltime
+  - num_cores
+  - version
+  - input
+  - workdir
+  - output
+  - barcode_whitelist
+  - aligner
+  - protocol
+  - reference
+  - fasta
+  - transcript_fasta
+  - gtf
+  - save_reference
+  - salmon_index
+  - txp2gene
+  - simpleaf_rlen
+  - star_index
+  - star_ignore_sjdbgtf
+  - seq_center
+  - star_feature
+  - kallisto_gene_map
+  - kallisto_index
+  - kb_workflow
+  - cellranger_index
+  - universc_index
+  - universc_technology
+  - skip_multiqc
+  - skip_fastqc
+  - resume
+  - extra_parameters

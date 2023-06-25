@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+
+# Clean the environment
+module purge
+
+# Go to workding directory
+workdir=<%= context.workdir %>
+
+if [ ! -d "$workdir" ]
+then
+	echo "$workdir does not exist."
+	mkdir -p $workdir
+fi
+cd $workdir
+
+# Load the required module
+module load nextflow
+
+module list
+
+# Pipeline parameters
+version=<%= context.version %>
+input_input=<%= context.input %>
+input_type_input=<%= context.input_type %>
+ena_metadata_fields_input=<%= context.ena_metadata_fields %>
+output=<%= context.output %>
+extra_parameters="<%= context.extra_parameters %>"
+sample_mapping_fields_input="<%= context.sample_mapping_fields %>"
+nf_core_pipeline_input="<%= context.nf_core_pipeline %>"
+nf_core_rnaseq_strandedness_input="<%= context.nf_core_rnaseq_strandedness %>"
+force_sratools_download_input="<%= context.force_sratools_download %>" 
+resume_input=<%= context.resume %>
+skip_fastq_download_input=<%= context.skip_fastq_download  %>
+
+
+# Test whether input is set
+if [ -z "${input_input// }" ]
+then
+        echo "you did not provide input file"
+        input=""
+else
+        echo "your input file is: $input_input"
+        input="--input '$input_input'"
+fi
+
+# Remove any white lines in input
+sed -i '/^[[:space:]]*$/d' $input_input
+
+# Test whether input_type is set
+if [ -z "${input_type_input// }" ]
+then
+        input_type=""
+else
+        input_type="--input_type $input_type_input"
+fi
+
+
+# Test whether ena_metadata_fields is set
+if [ -z "${ena_metadata_fields_input// }" ]
+then
+	ena_metadata_fields=""
+else
+        ena_metadata_fields='--ena_metadata_fields "'$ena_metadata_fields_input'"'
+fi
+
+# Test whether sample_mapping_fields is set
+if [ -z "${sample_mapping_fields_input// }" ]
+then
+        sample_mapping_fields=""
+else
+        sample_mapping_fields='--sample_mapping_fields "'$sample_mapping_fields_input'"'
+fi
+
+# Test whether nf_core_pipeline is set
+if [ -z "${nf_core_pipeline_input// }" ]
+then
+	nf_core_pipeline=""
+else
+        nf_core_pipeline="--nf_core_pipeline $nf_core_pipeline_input"
+fi
+
+# Test whether nf_core_rnaseq_strandedness is set
+if [ -z "${nf_core_rnaseq_strandedness_input// }" ]
+then
+        nf_core_rnaseq_strandedness=""
+else
+        nf_core_rnaseq_strandedness="--nf_core_rnaseq_strandedness $nf_core_rnaseq_strandedness_input"
+fi
+
+# Test whether force_sratools_download is set
+if [ $force_sratools_download_input -eq 1 ]
+then
+        force_sratools_download="--force_sratools_download"
+else
+        force_sratools_download=""
+fi
+
+# Test whether skip_fastq_download is set
+if [ $skip_fastq_download_input -eq 1 ]
+then
+        skip_fastq_download="--skip_fastq_download"
+else
+        skip_fastq_download=""
+fi
+
+
+
+# Test whether resume is set
+if [ $resume_input -eq 1 ]
+then
+	echo "You job will resume previous run"
+        resume="-resume"
+else
+	echo "This is a fresh run"
+        resume=""
+fi
+
+
+echo "Below is the nextflow command you are running:"
+echo "+++++++++++++++++++++++++++++++++++++++++++"
+command="nextflow run $version $input $input_type --outdir $output -profile singularity  $sample_mapping_fields $nf_core_pipeline $nf_core_rnaseq_strandedness $force_sratools_download $skip_fastq_download $extra_parameters $resume"
+
+echo $command
+eval $command

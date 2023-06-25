@@ -1,0 +1,272 @@
+#!/usr/bin/env bash
+
+# Clean the environment
+module purge
+
+# Go to workding directory
+workdir=<%= context.workdir %>
+
+if [ ! -d "$workdir" ]
+then
+	echo "$workdir does not exist."
+	mkdir -p $workdir
+fi
+cd $workdir
+
+# Load the required module
+module load nextflow
+
+module list
+
+# Pipeline parameters
+version=<%= context.version %>
+input_input=<%= context.input %>
+output=<%= context.output %>
+save_reference=<%= context.save_reference %>
+extra_parameters="<%= context.extra_parameters %>"
+fasta_input="<%= context.fasta %>"
+gtf_input="<%= context.gtf %>"
+transcript_fasta_input="<%= context.transcript_fasta %>"
+reference_input="<%= context.reference %>" 
+save_reference_input=<%= context.save_reference %>
+resume_input=<%= context.resume %>
+barcode_whitelist_input=<%= context.barcode_whitelist %>
+aligner="<%= context.aligner %>"
+protocol_input="<%= context.protocol %>"
+salmon_index_input="<%= context.salmon_index %>"
+txp2gene_input="<%= context.txp2gene %>"
+simpleaf_rlen="<%= context.simpleaf_rlen %>"
+star_index_input="<%= context.star_index %>"
+star_ignore_sjdbgtf_input=<%= context.star_ignore_sjdbgtf %>
+seq_center_input=<%= context.seq_center %>
+star_feature_input=<%= context.star_feature %>
+kallisto_gene_map_input="<%= context.kallisto_gene_map %>"
+kallisto_index_input="<%= context.kallisto_index %>"
+kb_workflow_input="<%= context.kb_workflow %>"
+cellranger_index_input=<%= context.cellranger_index %>
+universc_index_input=<%= context.universc_index %>
+universc_technology_input="<%= context.universc_technology %>"
+skip_multiqc_input="<%= context.skip_multiqc %>"
+skip_fastqc_input="<%= context.skip_fastqc %>"
+
+# Test whether input is set
+if [ -z "${input_input// }" ]
+then
+        echo "you did not provide input file"
+        input=""
+else
+        echo "your input file is: $input_input"
+        input="--input $input_input"
+fi
+
+
+# Test whether reference is set
+if [ -z "${reference_input// }" ]
+then
+	echo "Remember to provide your own genome in fasta"
+	reference=""
+	iGenomes_base=""
+else
+        echo "you're using the iGenomes $reference_input"
+	reference="--genome $reference_input"
+	iGenomes_base="--igenomes_base /depot/itap/datasets/igenomes"
+fi
+
+# Test whether fasta is set
+if [ -z "${fasta_input// }" ]
+then
+        echo "you did not provide fasta file"
+        fasta=""
+else
+	echo "you're using your own genome $fasta_input"
+        fasta="--fasta $fasta_input"
+fi
+
+# Test whether transcript_fasta is set
+if [ -z "${transcript_fasta_input// }" ]
+then
+        echo "you did not provide transcript_fasta file"
+        transcript_fasta=""
+else
+        echo "you're using your own genome $transcript_fasta_input"
+        transcript_fasta="--transcript_fasta $transcript_fasta_input"
+fi
+
+# Test whether gtf is set
+if [ -z "${gtf_input// }" ]
+then
+        echo "you did not provide gtf file"
+	gtf=""
+else
+	echo "you're using your own annotation $gtf_input"
+        gtf="--gtf $gtf_input"
+fi
+
+# Test whether salmon_index is set
+if [ -z "${salmon_index_input// }" ]
+then
+        echo "you did not provide salmon_index file"
+        salmon_index=""
+else
+        echo "you're using your own salmon_index"
+        salmon_index="--salmon_index $salmon_index_input"
+fi
+
+# Test whether txp2gene is set
+if [ -z "${txp2gene_input// }" ]
+then
+        echo "you did not provide txp2gene file"
+        txp2gene=""
+else
+        echo "you're using your own txp2gene"
+        txp2gene="--txp2gene $txp2gene_input"
+fi
+
+# Test whether simpleaf_rlen is set
+if [ -z "${simpleaf_rlen_input// }" ]
+then
+        echo "you did not provide simpleaf_rlen file"
+        simpleaf_rlen=""
+else
+        echo "you're using your own simpleaf_rlen"
+        simpleaf_rlen="--simpleaf_rlen $simpleaf_rlen_input"
+fi
+
+
+
+# Test whether star_index is set
+if [ -z "${star_index_input// }" ]
+then
+        echo "you did not provide star_index file"
+        star_index=""
+else
+        echo "you're using your own star_index"
+        star_index="--star_index $star_index_input"
+fi
+
+# Test whether star_ignore_sjdbgtf is set
+if [ -z "${star_ignore_sjdbgtf_input// }" ]
+then
+        echo "you did not provide star_ignore_sjdbgtf file"
+        star_ignore_sjdbgtf=""
+else
+        echo "you're using your own star_ignore_sjdbgtf"
+        star_ignore_sjdbgtf="--star_ignore_sjdbgtf $star_ignore_sjdbgtf_input"
+fi
+
+# Test whether star_feature is set
+if [ -z "${star_feature_input// }" ]
+then
+        echo "you did not provide star_feature file"
+        star_feature=""
+else
+        echo "you're using your own star_feature"
+        star_feature="--star_feature $star_feature_input"
+fi
+
+# Test whether kallisto_gene_map is set
+if [ -z "${kallisto_gene_map_input// }" ]
+then
+        echo "you did not provide kallisto_gene_map file"
+        kallisto_gene_map=""
+else
+        echo "you're using your own kallisto_gene_map"
+        kallisto_gene_map="--kallisto_gene_map $kallisto_gene_map_input"
+fi
+
+# Test whether kallisto_index is set
+if [ -z "${kallisto_index_input// }" ]
+then
+        echo "you did not provide kallisto_index file"
+        kallisto_index=""
+else
+        echo "you're using your own kallisto_index"
+        kallisto_index="--kallisto_index $kallisto_index_input"
+fi
+
+# Test whether kb_workflow is set
+if [ -z "${kb_workflow_input// }" ]
+then
+        echo "you did not provide kb_workflow file"
+        kb_workflow=""
+else
+        echo "you're using your own kb_workflow"
+        kb_workflow="--kb_workflow $kb_workflow_input"
+fi
+
+# Test whether cellranger_index is set
+if [ -z "${cellranger_index_input// }" ]
+then
+        echo "you did not provide cellranger_index file"
+        cellranger_index=""
+else
+        echo "you're using your own cellranger_index"
+        cellranger_index="--cellranger_index $cellranger_index_input"
+fi
+
+# Test whether universc_index is set
+if [ -z "${universc_index_input// }" ]
+then
+        echo "you did not provide universc_index file"
+        universc_index=""
+else
+        echo "you're using your own universc_index"
+        universc_index="--universc_index $universc_index_input"
+fi
+
+# Test whether universc_technology is set
+if [ -z "${universc_technology_input// }" ]
+then
+        echo "you did not provide universc_technology file"
+        universc_technology=""
+else
+        echo "you're using your own universc_technology"
+        universc_technology="--universc_technology $universc_technology_input"
+fi
+
+
+
+# Test whether save_reference is set
+if [ $save_reference_input -eq 1 ]
+then
+	echo "Your reference will be saved locally"
+	save_reference="--save_reference"
+else
+	echo "You do not want to save reference"
+	save_reference=""
+fi
+
+# Test whether skip_multiqc is set
+if [ $skip_multiqc_input -eq 1 ]
+then
+        skip_multiqc="--skip_multiqc"
+else
+        skip_multiqc=""
+fi
+
+# Test whether skip_fastqc is set
+if [ $skip_fastqc_input -eq 1 ]
+then
+        skip_fastqc="--skip_fastqc"
+else
+        skip_fastqc=""
+fi
+
+
+# Test whether resume is set
+if [ $resume_input -eq 1 ]
+then
+	echo "You job will resume previous run"
+        resume="-resume"
+else
+	echo "This is a fresh run"
+        resume=""
+fi
+
+
+echo "Below is the nextflow command you are running:"
+echo "+++++++++++++++++++++++++++++++++++++++++++"
+command="nextflow run $version $input --outdir $output -profile singularity $barcode_whitelist $protocol $iGenomes_base $reference $fasta $gtf $transcript_fasta $aligner $salmon_index $txp2gene $simpleaf_rlen  $star_index $star_ignore_sjdbgtf $seq_center $star_feature $kallisto_gene_map $kallisto_index $kb_workflow $cellranger_index $universc_index $universc_technology $skip_multiqc $skip_fastqc  $save_reference $trimmer  $extra_parameters $resume"
+
+echo $command
+eval $command
