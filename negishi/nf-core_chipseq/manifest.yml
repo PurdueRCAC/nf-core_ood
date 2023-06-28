@@ -4,6 +4,6 @@ category: Interactive Apps
 subcategory: nf-core pipelines
 role: batch_connect
 description: |
-  This app will launch the RNAseq pipeline developed by nf-core community. 
+  This app will launch the chipseq pipeline developed by nf-core community. 
   More information about the pipeline can be found here (https://nf-co.re/chipseq).
 
