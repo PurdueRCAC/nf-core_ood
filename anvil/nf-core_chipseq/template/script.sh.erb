@@ -1,0 +1,518 @@
+#!/usr/bin/env bash
+
+# Clean the environment
+module purge
+
+# Go to workding directory
+workdir=<%= context.workdir %>
+
+if [ ! -d "$workdir" ]
+then
+	echo "$workdir does not exist."
+	mkdir -p $workdir
+fi
+cd $workdir
+
+# Load the required module
+module load nextflow
+
+module list
+
+# Pipeline parameters
+version_input="<%= context.version %>"
+genome_input="<%= context.genome %>"
+fasta_input="<%= context.fasta %>"
+gtf_input="<%= context.gtf %>"
+gff_input="<%= context.gff %>"
+bwa_index_input="<%= context.bwa_index %>"
+bowtie2_index_input="<%= context.bowtie2_index %>"
+chromap_index_input="<%= context.chromap_index %>"
+star_index_input="<%= context.star_index %>"
+gene_bed_input="<%= context.gene_bed %>"
+macs_gsize_input="<%= context.macs_gsize %>"
+blacklist_input="<%= context.blacklist %>"
+save_reference_input="<%= context.save_reference %>"
+input_input="<%= context.input %>"
+fragment_size_input="<%= context.fragment_size %>"
+seq_center_input="<%= context.seq_center %>"
+read_length_input="<%= context.read_length %>"
+workdir_input="<%= context.workdir %>"
+outdir_input="<%= context.outdir %>"
+skip_trimming_input="<%= context.skip_trimming %>"
+clip_r1_input="<%= context.clip_r1 %>"
+clip_r2_input="<%= context.clip_r2 %>"
+three_prime_clip_r1_input="<%= context.three_prime_clip_r1 %>"
+three_prime_clip_r2_input="<%= context.three_prime_clip_r2 %>"
+trim_nextseq_input="<%= context.trim_nextseq %>"
+save_trimmed_input="<%= context.save_trimmed %>"
+aligner_input="<%= context.aligner %>"
+keep_dups_input="<%= context.keep_dups %>"
+keep_multi_map_input="<%= context.keep_multi_map %>"
+bwa_min_score_input="<%= context.bwa_min_score %>"
+save_align_intermeds_input="<%= context.save_align_intermeds %>"
+save_unaligned_input="<%= context.save_unaligned %>"
+narrow_peak_input="<%= context.narrow_peak %>"
+broad_cutoff_input="<%= context.broad_cutoff %>"
+macs_fdr_input="<%= context.macs_fdr %>"
+macs_pvalue_input="<%= context.macs_pvalue %>"
+min_reps_consensus_input="<%= context.min_reps_consensus %>"
+save_macs_pileup_input="<%= context.save_macs_pileup %>"
+skip_peak_qc_input="<%= context.skip_peak_qc %>"
+skip_peak_annotation_input="<%= context.skip_peak_annotation %>"
+skip_consensus_peaks_input="<%= context.skip_consensus_peaks %>"
+skip_fastqc_input="<%= context.skip_fastqc %>"
+skip_picard_metrics_input="<%= context.skip_picard_metrics %>"
+skip_preseq_input="<%= context.skip_preseq %>"
+deseq2_vst_input="<%= context.deseq2_vst %>"
+skip_plot_profile_input="<%= context.skip_plot_profile %>"
+skip_plot_fingerprint_input="<%= context.skip_plot_fingerprint %>"
+skip_spp_input="<%= context.skip_spp %>"
+skip_deseq2_qc_input="<%= context.skip_deseq2_qc %>"
+skip_igv_input="<%= context.skip_igv %>"
+skip_multiqc_input="<%= context.skip_multiqc %>"
+skip_qc_input="<%= context.skip_qc %>"
+resume_input="<%= context.resume %>"
+extra_parameters_input="<%= context.extra_parameters %>"
+
+
+# Test whether version is set
+if [ -z "${version_input// }" ]
+then
+        version=""
+else
+        version="$version_input"
+fi
+
+# Test whether genome is set
+if [ -z "${genome_input// }" ]
+then
+        genome=""
+        iGenomes_base=""
+else
+        genome="--genome $genome_input"
+        iGenomes_base="--igenomes_base /anvil/datasets/igenomes"
+
+fi
+
+# Test whether fasta is set
+if [ -z "${fasta_input// }" ]
+then
+        fasta=""
+else
+        fasta="--fasta $fasta_input"
+fi
+
+# Test whether gtf is set
+if [ -z "${gtf_input// }" ]
+then
+        gtf=""
+else
+        gtf="--gtf $gtf_input"
+fi
+
+# Test whether gff is set
+if [ -z "${gff_input// }" ]
+then
+        gff=""
+else
+        gff="--gff $gff_input"
+fi
+
+# Test whether bwa_index is set
+if [ -z "${bwa_index_input// }" ]
+then
+        bwa_index=""
+else
+        bwa_index="--bwa_index $bwa_index_input"
+fi
+
+# Test whether bowtie2_index is set
+if [ -z "${bowtie2_index_input// }" ]
+then
+        bowtie2_index=""
+else
+        bowtie2_index="--bowtie2_index $bowtie2_index_input"
+fi
+
+# Test whether chromap_index is set
+if [ -z "${chromap_index_input// }" ]
+then
+        chromap_index=""
+else
+        chromap_index="--chromap_index $chromap_index_input"
+fi
+
+# Test whether star_index is set
+if [ -z "${star_index_input// }" ]
+then
+        star_index=""
+else
+        star_index="--star_index $star_index_input"
+fi
+
+# Test whether gene_bed is set
+if [ -z "${gene_bed_input// }" ]
+then
+        gene_bed=""
+else
+        gene_bed="--gene_bed $gene_bed_input"
+fi
+
+# Test whether macs_gsize is set
+if [ -z "${macs_gsize_input// }" ]
+then
+        macs_gsize=""
+else
+        macs_gsize="--macs_gsize $macs_gsize_input"
+fi
+
+# Test whether blacklist is set
+if [ -z "${blacklist_input// }" ]
+then
+        blacklist=""
+else
+        blacklist="--blacklist $blacklist_input"
+fi
+
+# Test whether input is set
+if [ -z "${input_input// }" ]
+then
+        input=""
+else
+        input="--input $input_input"
+fi
+
+# Test whether fragment_size is set
+if [ -z "${fragment_size_input// }" ]
+then
+        fragment_size=""
+else
+        fragment_size="--fragment_size $fragment_size_input"
+fi
+
+# Test whether seq_center is set
+if [ -z "${seq_center_input// }" ]
+then
+        seq_center=""
+else
+        seq_center="--seq_center $seq_center_input"
+fi
+
+# Test whether read_length is set
+if [ -z "${read_length_input// }" ]
+then
+        read_length=""
+else
+        read_length="--read_length $read_length_input"
+fi
+
+# Test whether workdir is set
+if [ -z "${workdir_input// }" ]
+then
+        workdir=""
+else
+        workdir="--workdir $workdir_input"
+fi
+
+# Test whether outdir is set
+if [ -z "${outdir_input// }" ]
+then
+        outdir=""
+else
+        outdir="--outdir $outdir_input"
+fi
+
+# Test whether clip_r1 is set
+if [ -z "${clip_r1_input// }" ]
+then
+        clip_r1=""
+else
+        clip_r1="--clip_r1 $clip_r1_input"
+fi
+
+# Test whether clip_r2 is set
+if [ -z "${clip_r2_input// }" ]
+then
+        clip_r2=""
+else
+        clip_r2="--clip_r2 $clip_r2_input"
+fi
+
+# Test whether three_prime_clip_r1 is set
+if [ -z "${three_prime_clip_r1_input// }" ]
+then
+        three_prime_clip_r1=""
+else
+        three_prime_clip_r1="--three_prime_clip_r1 $three_prime_clip_r1_input"
+fi
+
+# Test whether three_prime_clip_r2 is set
+if [ -z "${three_prime_clip_r2_input// }" ]
+then
+        three_prime_clip_r2=""
+else
+        three_prime_clip_r2="--three_prime_clip_r2 $three_prime_clip_r2_input"
+fi
+
+# Test whether trim_nextseq is set
+if [ -z "${trim_nextseq_input// }" ]
+then
+        trim_nextseq=""
+else
+        trim_nextseq="--trim_nextseq $trim_nextseq_input"
+fi
+
+# Test whether aligner is set
+if [ -z "${aligner_input// }" ]
+then
+        aligner=""
+else
+        aligner="--aligner $aligner_input"
+fi
+
+# Test whether bwa_min_score is set
+if [ -z "${bwa_min_score_input// }" ]
+then
+        bwa_min_score=""
+else
+        bwa_min_score="--bwa_min_score $bwa_min_score_input"
+fi
+
+# Test whether broad_cutoff is set
+if [ -z "${broad_cutoff_input// }" ]
+then
+        broad_cutoff=""
+else
+        broad_cutoff="--broad_cutoff $broad_cutoff_input"
+fi
+
+# Test whether macs_fdr is set
+if [ -z "${macs_fdr_input// }" ]
+then
+        macs_fdr=""
+else
+        macs_fdr="--macs_fdr $macs_fdr_input"
+fi
+
+# Test whether macs_pvalue is set
+if [ -z "${macs_pvalue_input// }" ]
+then
+        macs_pvalue=""
+else
+        macs_pvalue="--macs_pvalue $macs_pvalue_input"
+fi
+
+# Test whether min_reps_consensus is set
+if [ -z "${min_reps_consensus_input// }" ]
+then
+        min_reps_consensus=""
+else
+        min_reps_consensus="--min_reps_consensus $min_reps_consensus_input"
+fi
+
+# Test whether extra_parameters is set
+if [ -z "${extra_parameters_input// }" ]
+then
+        extra_parameters=""
+else
+        extra_parameters="--extra_parameters $extra_parameters_input"
+fi
+
+# Test whether save_reference is set
+if [ $save_reference_input -eq 1 ]
+then
+        save_reference="--save_reference"
+else
+        save_reference=""
+fi
+
+# Test whether skip_trimming is set
+if [ $skip_trimming_input -eq 1 ]
+then
+        skip_trimming="--skip_trimming"
+else
+        skip_trimming=""
+fi
+
+# Test whether save_trimmed is set
+if [ $save_trimmed_input -eq 1 ]
+then
+        save_trimmed="--save_trimmed"
+else
+        save_trimmed=""
+fi
+
+# Test whether keep_dups is set
+if [ $keep_dups_input -eq 1 ]
+then
+        keep_dups="--keep_dups"
+else
+        keep_dups=""
+fi
+
+# Test whether keep_multi_map is set
+if [ $keep_multi_map_input -eq 1 ]
+then
+        keep_multi_map="--keep_multi_map"
+else
+        keep_multi_map=""
+fi
+
+# Test whether save_align_intermeds is set
+if [ $save_align_intermeds_input -eq 1 ]
+then
+        save_align_intermeds="--save_align_intermeds"
+else
+        save_align_intermeds=""
+fi
+
+# Test whether save_unaligned is set
+if [ $save_unaligned_input -eq 1 ]
+then
+        save_unaligned="--save_unaligned"
+else
+        save_unaligned=""
+fi
+
+# Test whether narrow_peak is set
+if [ $narrow_peak_input -eq 1 ]
+then
+        narrow_peak="--narrow_peak"
+else
+        narrow_peak=""
+fi
+
+# Test whether save_macs_pileup is set
+if [ $save_macs_pileup_input -eq 1 ]
+then
+        save_macs_pileup="--save_macs_pileup"
+else
+        save_macs_pileup=""
+fi
+
+# Test whether skip_peak_qc is set
+if [ $skip_peak_qc_input -eq 1 ]
+then
+        skip_peak_qc="--skip_peak_qc"
+else
+        skip_peak_qc=""
+fi
+
+# Test whether skip_peak_annotation is set
+if [ $skip_peak_annotation_input -eq 1 ]
+then
+        skip_peak_annotation="--skip_peak_annotation"
+else
+        skip_peak_annotation=""
+fi
+
+# Test whether skip_consensus_peaks is set
+if [ $skip_consensus_peaks_input -eq 1 ]
+then
+        skip_consensus_peaks="--skip_consensus_peaks"
+else
+        skip_consensus_peaks=""
+fi
+
+# Test whether skip_fastqc is set
+if [ $skip_fastqc_input -eq 1 ]
+then
+        skip_fastqc="--skip_fastqc"
+else
+        skip_fastqc=""
+fi
+
+# Test whether skip_picard_metrics is set
+if [ $skip_picard_metrics_input -eq 1 ]
+then
+        skip_picard_metrics="--skip_picard_metrics"
+else
+        skip_picard_metrics=""
+fi
+
+# Test whether skip_preseq is set
+if [ $skip_preseq_input -eq 1 ]
+then
+        skip_preseq="--skip_preseq"
+else
+        skip_preseq=""
+fi
+
+# Test whether deseq2_vst is set
+if [ $deseq2_vst_input -eq 1 ]
+then
+        deseq2_vst="--deseq2_vst"
+else
+        deseq2_vst=""
+fi
+
+# Test whether skip_plot_profile is set
+if [ $skip_plot_profile_input -eq 1 ]
+then
+        skip_plot_profile="--skip_plot_profile"
+else
+        skip_plot_profile=""
+fi
+
+# Test whether skip_plot_fingerprint is set
+if [ $skip_plot_fingerprint_input -eq 1 ]
+then
+        skip_plot_fingerprint="--skip_plot_fingerprint"
+else
+        skip_plot_fingerprint=""
+fi
+
+# Test whether skip_spp is set
+if [ $skip_spp_input -eq 1 ]
+then
+        skip_spp="--skip_spp"
+else
+        skip_spp=""
+fi
+
+# Test whether skip_deseq2_qc is set
+if [ $skip_deseq2_qc_input -eq 1 ]
+then
+        skip_deseq2_qc="--skip_deseq2_qc"
+else
+        skip_deseq2_qc=""
+fi
+
+# Test whether skip_igv is set
+if [ $skip_igv_input -eq 1 ]
+then
+        skip_igv="--skip_igv"
+else
+        skip_igv=""
+fi
+
+# Test whether skip_multiqc is set
+if [ $skip_multiqc_input -eq 1 ]
+then
+        skip_multiqc="--skip_multiqc"
+else
+        skip_multiqc=""
+fi
+
+# Test whether skip_qc is set
+if [ $skip_qc_input -eq 1 ]
+then
+        skip_qc="--skip_qc"
+else
+        skip_qc=""
+fi
+
+# Test whether resume is set
+if [ $resume_input -eq 1 ]
+then
+        resume="--resume"
+else
+        resume=""
+fi
+
+command="nextflow run $version $input $outdir -profile singularity $iGenomes_base $genome $fasta $gtf $gff $bwa_index $bowtie2_index $chromap_index $star_index $gene_bed $macs_gsize $blacklist $save_reference $fragment_size $seq_center $read_length $skip_trimming $clip_r1 $clip_r2 $three_prime_clip_r1 $three_prime_clip_r2 $trim_nextseq $save_trimmed $aligner $keep_dups $keep_multi_map $bwa_min_score $save_align_intermeds $save_unaligned $narrow_peak $broad_cutoff $macs_fdr $macs_pvalue $min_reps_consensus $save_macs_pileup $skip_peak_qc $skip_peak_annotation $skip_consensus_peaks $skip_fastqc $skip_picard_metrics $skip_preseq $deseq2_vst $skip_plot_profile $skip_plot_fingerprint $skip_spp $skip_deseq2_qc $skip_igv $skip_multiqc $skip_qc $resume $extra_parameters "
+
+echo $command
+eval $command
+
+

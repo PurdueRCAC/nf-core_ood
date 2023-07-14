@@ -1,0 +1,247 @@
+---
+cluster: "anvil"
+attributes:
+
+  node_type: null
+
+  queue:
+    label: Queue (partition)
+    value: "wholenode"
+    help: |
+      -    GPU-only allocations MUST use the 'gpu' queue
+      -    CPU-only allocations MAY NOT use the 'gpu' queue
+    widget: select
+    options:
+      - [ 
+        "wholenode", "wholenode",
+        data-hide-num-gpus: true,
+        data-min-num-cores: 128,
+        data-set-num-cores: 128,
+        data-max-walltime: 96,
+        ]
+      - [ 
+        "shared", "shared", 
+        data-hide-num-gpus: true,        
+        data-set-num-cores: 1,
+        data-max-walltime: 96,
+        ]
+      - [ 
+        "highmem", "highmem", 
+        data-hide-num-gpus: true, 
+        data-set-num-cores: 1,
+        data-max-walltime: 48,
+        ]
+      - [ 
+        "gpu", "gpu",
+         data-set-num-cores: 1,
+         data-max-walltime: 48,
+         ]
+
+  num_gpus:
+    label: Number of GPUs
+    widget: select
+    help: |
+        Number of Nvidia A100 GPUs you are requesting.
+    options:
+      - [ 
+        "0", "0",
+        data-option-for-queue-gpu: false,
+        ]
+      - [
+        "1", "1",
+        data-option-for-queue-wholenode: false,
+        data-option-for-queue-shared: false,
+        data-option-for-queue-highmem: false,
+        ]
+      - [
+        "2", "2",
+        data-option-for-queue-wholenode: false,
+        data-option-for-queue-shared: false,
+        data-option-for-queue-highmem: false,
+        ]
+      - [
+        "3", "3",
+        data-option-for-queue-wholenode: false,
+        data-option-for-queue-shared: false,
+        data-option-for-queue-highmem: false,
+        ]
+      - [
+        "4", "4",
+        data-option-for-queue-wholenode: false,
+        data-option-for-queue-shared: false,
+        data-option-for-queue-highmem: false,
+        ]
+
+  num_cores:
+    label: Cores
+    widget: number_field
+    max: 128
+    min: 1
+    value: 1
+    help: |
+        You will receive ~2GB of memory per core requested.
+    
+
+  walltime:
+    label: Wall Time in Hours
+    widget: number_field
+    help: |
+        Number of hours you are requesting for your job.
+    max: 96
+    min: 0.5
+    step: 0.5
+    value: 0.5
+
+  account:
+    label: Allocation
+    widget: select
+    options:
+        <%- Purdue::Balance.mybalance().each do |q| %>
+            <%- allocation = q.split(" ")[0]      %>
+            <%- balance = q.split(" ")[1]         %>
+            <%- if balance.strip == 'n/a' %>
+                <%-  balance = '0' %>
+            <%- end %>
+      - [ "<%= allocation %> (<%= balance %> SUs remaining)", "<%= allocation %>" ]
+<%- end -%>
+
+  version:
+    label: Version
+    widget: select
+    options:
+      - ["2.0.0",	"/apps/biocontainers/nf-core/nf-core-bamtofastq-2.0.0/workflow"]
+
+  input:
+    data-filepicker: true
+    data-target-file-type: files
+    label: Input
+    readonly: false
+    help: "Path to comma-separated file containing information about the samples in the experiment." 
+
+  workdir:
+    label: "Working Directory"
+    data-filepicker: true
+    data-target-file-type: dirs  # Valid values are: files, dirs, or both
+    readonly: false
+    help: "Select your project directory; defaults to $HOME"
+
+  output:
+    widget: "text_field"
+    required: true
+    label: "Output directory Name"
+    help: "The output directory where the results will be saved."
+
+  reference:
+    label: Name of iGenomes reference
+    widget: select
+    required: false
+    options:
+      - ['None', ' ']
+      - ['GRCh37', 'GRCh37']
+      - ['GRCh38', 'GRCh38']
+      - ['GRCm38', 'GRCm38']
+      - ['TAIR10', 'TAIR10']
+      - ['EB2', 'EB2']
+      - ['UMD3.1', 'UMD3.1']
+      - ['WBcel235', 'WBcel235']
+      - ['CanFam3.1', 'CanFam3.1']
+      - ['GRCz10', 'GRCz10']
+      - ['BDGP6', 'BDGP6']
+      - ['EquCab2', 'EquCab2']
+      - ['EB1', 'EB1']
+      - ['Galgal4', 'Galgal4']
+      - ['Gm01', 'Gm01']
+      - ['Mmul_1', 'Mmul_1']
+      - ['IRGSP-1.0', 'IRGSP-1.0']
+      - ['CHIMP2.1.4', 'CHIMP2.1.4']
+      - ['Rnor_5.0', 'Rnor_5.0']
+      - ['Rnor_6.0', 'Rnor_6.0']
+      - ['R64-1-1', 'R64-1-1']
+      - ['EF2', 'EF2']
+      - ['Sbi1', 'Sbi1']
+      - ['Sscrofa10.2', 'Sscrofa10.2']
+      - ['AGPv3', 'AGPv3']
+      - ['hg38', 'hg38']
+      - ['hg19', 'hg19']
+      - ['mm10', 'mm10']
+      - ['bosTau8', 'bosTau8']
+      - ['ce10', 'ce10']
+      - ['canFam3', 'canFam3']
+      - ['danRer10', 'danRer10']
+      - ['dm6', 'dm6']
+      - ['equCab2', 'equCab2']
+      - ['galGal4', 'galGal4']
+      - ['panTro4', 'panTro4']
+      - ['rn6', 'rn6']
+      - ['sacCer3', 'sacCer3']
+      - ['susScr3', 'susScr3']
+
+  fasta:
+    widget: text_field
+    required: false
+    value: " "
+    label: Path to fasta of your own genome
+    help: |
+           This is required if your genome is not included in iGenomes.
+
+  fasta_fai:
+    widget: text_field
+    required: false
+    value: " "
+    label: fasta_fai
+    help: "Path to FASTA FAI genome index file."
+
+  chr:
+    widget: text_field
+    required: false
+    label: chr
+    help: |
+           Only use reads mapping to a specific chromosome/region. Has to be specified as in bam: i.e chr1, chr{1..22} (gets all reads mapping to chr1 to 22), 1, "X Y",
+           incorrect naming will lead to a potentially silent error.
+    
+  no_read_QC:
+    label: no_read_QC
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "If specified, no quality control will be performed on extracted reads. "
+
+  no_stats:
+    label: no_stats
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "If specified, skips all quality control and stats computation, including FastQC on both input bam and output reads."
+
+  resume:
+    label: Resume
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: |
+           Resume previous run if found
+
+  extra_parameters:
+    widget: text_field
+    required: false
+    label: Extra parameters
+    help: |
+           Extra parameters to use in the pipeline. Multiple space-separated parameters can be used.
+
+form:
+  - account      
+  - queue
+  - walltime
+  - num_cores
+  - version
+  - input
+  - workdir
+  - output
+  - reference
+  - fasta
+  - fasta_fai
+  - chr
+  - no_read_QC
+  - no_stats
+  - resume
+  - extra_parameters
